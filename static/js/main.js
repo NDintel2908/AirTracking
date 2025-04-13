@@ -1,4 +1,45 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Kiểm tra trạng thái kết nối
+    function updateOnlineStatus() {
+        const offlineIndicator = document.getElementById('offline-indicator');
+        if (navigator.onLine) {
+            offlineIndicator.style.display = 'none';
+        } else {
+            offlineIndicator.style.display = 'block';
+        }
+    }
+
+    // Lắng nghe sự kiện kết nối
+    window.addEventListener('online', () => {
+        updateOnlineStatus();
+        fetchCurrentData();
+        updateMainChart(document.getElementById('chart-param').value);
+    });
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    // Xử lý kéo xuống để làm mới
+    let touchStartY = 0;
+    let touchEndY = 0;
+    
+    document.addEventListener('touchstart', e => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    
+    document.addEventListener('touchmove', e => {
+        touchEndY = e.touches[0].clientY;
+        if (window.scrollY === 0 && touchEndY - touchStartY > 70) {
+            document.body.classList.add('pull-active');
+        }
+    }, { passive: true });
+    
+    document.addEventListener('touchend', e => {
+        if (document.body.classList.contains('pull-active')) {
+            document.body.classList.remove('pull-active');
+            refreshData();
+        }
+    });
+
     // Initialize
     updateLastUpdated();
     fetchCurrentData();
@@ -6,24 +47,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listeners
     document.getElementById('refresh-btn').addEventListener('click', function() {
-        fetchCurrentData();
-        updateMainChart(document.getElementById('chart-param').value);
+        const icon = document.querySelector('#refresh-btn i');
+        icon.classList.add('spinning');
+        
+        refreshData();
+        
+        // Dừng hiệu ứng quay sau 1 giây
+        setTimeout(() => {
+            icon.classList.remove('spinning');
+        }, 1000);
     });
 
     document.getElementById('chart-param').addEventListener('change', function() {
         updateMainChart(this.value);
     });
 
+    // Xử lý chuyển tab qua bottom navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const tabName = this.querySelector('.nav-label').textContent;
+            
+            if (tabName === 'Biểu đồ') {
+                // Cuộn xuống phần biểu đồ
+                document.querySelector('.chart-container').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            } 
+            else if (tabName === 'Cài đặt') {
+                // Tạm thời chỉ hiển thị thông báo
+                alert('Tính năng đang phát triển');
+            }
+            
+            // Cập nhật tab hoạt động
+            document.querySelectorAll('.nav-item').forEach(navItem => {
+                navItem.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
+
     // Auto refresh data every 30 seconds
     setInterval(function() {
-        fetchCurrentData();
-        updateMainChart(document.getElementById('chart-param').value);
+        if (navigator.onLine) {
+            fetchCurrentData();
+            updateMainChart(document.getElementById('chart-param').value);
+        }
     }, 30000);
 
     // Functions
+    function refreshData() {
+        fetchCurrentData();
+        updateMainChart(document.getElementById('chart-param').value);
+    }
+
     function updateLastUpdated() {
         const now = new Date();
-        document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+        document.getElementById('last-updated').textContent = 
+            `Cập nhật lúc: ${now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}`;
     }
 
     function fetchCurrentData() {
@@ -34,9 +114,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateLastUpdated();
             })
             .catch(error => {
-                console.error('Error fetching data:', error);
+                console.error('Lỗi tải dữ liệu:', error);
                 document.getElementById('data-grid').innerHTML = 
-                    '<div class="error">Error loading data. Please try again.</div>';
+                    '<div class="error">Lỗi tải dữ liệu. Vui lòng thử lại.</div>';
+                
+                // Kiểm tra nếu đang offline
+                if (!navigator.onLine) {
+                    document.getElementById('data-grid').innerHTML = 
+                        '<div class="error">Bạn đang ở chế độ ngoại tuyến. Vui lòng kiểm tra kết nối mạng.</div>';
+                }
             });
     }
 
@@ -59,28 +145,59 @@ document.addEventListener('DOMContentLoaded', function() {
         const paramNames = {
             'pm10': 'PM10',
             'pm25': 'PM2.5',
-            'temperature': 'Temperature',
-            'humidity': 'Humidity',
-            'noise': 'Noise',
+            'temperature': 'Nhiệt độ',
+            'humidity': 'Độ ẩm',
+            'noise': 'Tiếng ồn',
             'co': 'CO',
             'co2': 'CO2'
+        };
+        
+        // Status translation
+        const statusTranslations = {
+            'normal': 'BÌNH THƯỜNG',
+            'warning': 'CẢNH BÁO',
+            'danger': 'NGUY HIỂM',
+            'offline': 'NGOẠI TUYẾN'
         };
 
         for (const [param, reading] of Object.entries(data)) {
             const card = document.createElement('div');
             card.className = 'data-card';
+            
+            const statusText = statusTranslations[reading.status] || reading.status.toUpperCase();
+            
+            // Thêm chỉ báo trạng thái
+            let statusIndicator = '';
+            if (reading.status === 'warning' || reading.status === 'danger') {
+                statusIndicator = `<span class="status-badge ${reading.status}"></span>`;
+            }
+            
             card.innerHTML = `
                 <div class="card-title">
                     <i class="fas ${paramIcons[param]}"></i> ${paramNames[param]}
+                    ${statusIndicator}
                 </div>
                 <div class="card-value">${reading.value}</div>
                 <div class="card-unit">${reading.unit}</div>
                 <div class="card-status ${reading.status}">
-                    ${reading.status.toUpperCase()}
+                    ${statusText}
                 </div>
             `;
             
-            // Add click event to navigate to detail page
+            // Add tap effect (for mobile devices)
+            card.addEventListener('touchstart', function() {
+                this.style.opacity = '0.7';
+            });
+            
+            card.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+                // Navigate after a short delay to show the tap effect
+                setTimeout(() => {
+                    window.location.href = `/parameter/${param}`;
+                }, 150);
+            });
+            
+            // For desktop users
             card.addEventListener('click', () => {
                 window.location.href = `/parameter/${param}`;
             });
@@ -112,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
             })
             .catch(error => {
-                console.error('Error updating chart:', error);
+                console.error('Lỗi cập nhật biểu đồ:', error);
             });
     }
 
@@ -124,28 +241,25 @@ document.addEventListener('DOMContentLoaded', function() {
             window.mainChart.destroy();
         }
         
+        // Create gradient for better visual appearance
+        const gradient = createGradientBackground(ctx, 'rgba(75, 192, 192, 0.7)', 'rgba(75, 192, 192, 0.1)');
+        
         window.mainChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: labels.map(formatTimeForDisplay),
                 datasets: [{
                     label: `${paramName} (${unit})`,
                     data: values,
                     borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    tension: 0.1,
-                    fill: true
+                    backgroundColor: gradient,
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 6
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: false
-                    }
-                }
-            }
+            options: getStandardChartOptions(paramName)
         });
     }
 });

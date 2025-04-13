@@ -1,9 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ parameter.name.upper() }} - Environmental Monitoring</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#3498db">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Chi tiết thông số {{ parameter.name.upper() }}: dữ liệu hiện tại và lịch sử">
+    <title>{{ parameter.name.upper() }} - Môi Trường Xung Quanh</title>
+    
+    <!-- PWA support -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192x192.svg') }}">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- Chart.js from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,36 +21,46 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <!-- Pull to refresh indicator -->
+    <div class="pull-indicator">
+        <i class="fas fa-arrow-down"></i> Kéo xuống để làm mới
+    </div>
+    
+    <!-- Offline indicator -->
+    <div class="offline-indicator" id="offline-indicator">
+        Bạn đang ở chế độ ngoại tuyến
+    </div>
+    
     <div class="container">
         <header>
             <div class="back-link">
-                <a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                <a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Quay lại trang chính</a>
             </div>
-            <h1>{{ parameter.name.upper() }} Details</h1>
+            <h1>Chi tiết {{ parameter.name.upper() }}</h1>
             <div class="refresh">
-                <button id="refresh-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                <button id="refresh-btn"><i class="fas fa-sync-alt"></i> Làm mới</button>
                 <span id="last-updated"></span>
             </div>
         </header>
 
         <div class="parameter-details">
             <div class="current-reading" id="current-reading">
-                <div class="loading">Loading current data...</div>
+                <div class="loading">Đang tải dữ liệu...</div>
             </div>
 
             <div class="parameter-info">
-                <h3>About {{ parameter.name.upper() }}</h3>
+                <h3>Thông tin về {{ parameter.name.upper() }}</h3>
                 <table>
                     <tr>
-                        <td>Unit:</td>
+                        <td>Đơn vị:</td>
                         <td>{{ parameter.unit }}</td>
                     </tr>
                     <tr>
-                        <td>Warning Level:</td>
+                        <td>Ngưỡng cảnh báo:</td>
                         <td>{{ parameter.warning }} {{ parameter.unit }}</td>
                     </tr>
                     <tr>
-                        <td>Danger Level:</td>
+                        <td>Ngưỡng nguy hiểm:</td>
                         <td>{{ parameter.danger }} {{ parameter.unit }}</td>
                     </tr>
                 </table>
@@ -48,16 +68,38 @@
         </div>
 
         <div class="chart-container">
-            <h2>{{ parameter.name.upper() }} History</h2>
+            <h2>Lịch sử {{ parameter.name.upper() }}</h2>
             <div class="chart-wrapper">
                 <canvas id="param-chart"></canvas>
             </div>
         </div>
 
         <footer>
-            <p>Environmental Monitoring Dashboard &copy; 2023</p>
+            <p>Giám sát môi trường &copy; 2025</p>
         </footer>
     </div>
+    
+    <!-- Mobile navigation bar -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-container">
+            <div class="nav-item">
+                <i class="fas fa-home"></i>
+                <span class="nav-label">Trang chủ</span>
+            </div>
+            <div class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span class="nav-label">Chi tiết</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-bell"></i>
+                <span class="nav-label">Thông báo</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span class="nav-label">Cài đặt</span>
+            </div>
+        </div>
+    </nav>
 
     <script>
         // Pass parameter info to JavaScript
@@ -65,8 +107,46 @@
         const parameterUnit = "{{ parameter.unit }}";
     </script>
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/register-sw.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Kiểm tra trạng thái kết nối
+            function updateOnlineStatus() {
+                const offlineIndicator = document.getElementById('offline-indicator');
+                if (navigator.onLine) {
+                    offlineIndicator.style.display = 'none';
+                } else {
+                    offlineIndicator.style.display = 'block';
+                }
+            }
+
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+        
+            // Xử lý kéo xuống để làm mới
+            let touchStartY = 0;
+            let touchEndY = 0;
+            
+            document.addEventListener('touchstart', e => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            document.addEventListener('touchmove', e => {
+                touchEndY = e.touches[0].clientY;
+                if (window.scrollY === 0 && touchEndY - touchStartY > 70) {
+                    document.body.classList.add('pull-active');
+                }
+            }, { passive: true });
+            
+            document.addEventListener('touchend', e => {
+                if (document.body.classList.contains('pull-active')) {
+                    document.body.classList.remove('pull-active');
+                    fetchCurrentReading();
+                    fetchParameterHistory();
+                }
+            });
+        
             // Initialize
             updateLastUpdated();
             fetchCurrentReading();
@@ -74,8 +154,16 @@
 
             // Set up refresh button
             document.getElementById('refresh-btn').addEventListener('click', () => {
+                const icon = document.querySelector('#refresh-btn i');
+                icon.classList.add('spinning');
+                
                 fetchCurrentReading();
                 fetchParameterHistory();
+                
+                // Dừng hiệu ứng quay sau 1 giây
+                setTimeout(() => {
+                    icon.classList.remove('spinning');
+                }, 1000);
             });
 
             // Auto refresh every 30 seconds
@@ -86,7 +174,7 @@
 
             function updateLastUpdated() {
                 const now = new Date();
-                document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+                document.getElementById('last-updated').textContent = `Cập nhật lúc: ${now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}`;
             }
 
             function fetchCurrentReading() {
@@ -102,7 +190,7 @@
                                 <span class="unit">${reading.unit}</span>
                             </div>
                             <div class="reading-status ${reading.status}">
-                                Status: ${reading.status.toUpperCase()}
+                                Trạng thái: ${translateStatus(reading.status)}
                             </div>
                         `;
                         
@@ -111,7 +199,7 @@
                     .catch(error => {
                         console.error('Error fetching current reading:', error);
                         document.getElementById('current-reading').innerHTML = 
-                            '<div class="error">Error loading data. Please try again.</div>';
+                            '<div class="error">Lỗi tải dữ liệu. Vui lòng thử lại.</div>';
                     });
             }
 
@@ -141,27 +229,40 @@
                 window.parameterChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: labels,
+                        labels: labels.map(formatTimeForDisplay),
                         datasets: [{
                             label: `${parameterName.toUpperCase()} (${parameterUnit})`,
                             data: values,
                             borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            tension: 0.1,
-                            fill: true
+                            backgroundColor: createGradientBackground(ctx, 'rgba(75, 192, 192, 0.7)', 'rgba(75, 192, 192, 0.1)'),
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: false
-                            }
-                        }
-                    }
+                    options: getStandardChartOptions(`${parameterName.toUpperCase()}`)
                 });
             }
+            
+            function translateStatus(status) {
+                const translations = {
+                    'normal': 'BÌNH THƯỜNG',
+                    'warning': 'CẢNH BÁO',
+                    'danger': 'NGUY HIỂM',
+                    'offline': 'NGOẠI TUYẾN'
+                };
+                return translations[status] || status.toUpperCase();
+            }
+            
+            // Xử lý chuyển trang bằng bottom nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    if (this.querySelector('.nav-label').textContent === 'Trang chủ') {
+                        window.location.href = '{{ url_for("index") }}';
+                    }
+                });
+            });
         });
     </script>
 </body>

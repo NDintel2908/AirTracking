@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512px" height="512px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Environmental Monitoring Icon</title>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#3498DB" offset="0%"></stop>
+            <stop stop-color="#2980B9" offset="100%"></stop>
+        </linearGradient>
+        <circle id="path-2" cx="256" cy="256" r="240"></circle>
+        <filter x="-5.0%" y="-5.0%" width="110.0%" height="110.0%" filterUnits="objectBoundingBox" id="filter-3">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="8" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Environmental-Icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Circle">
+            <use fill="black" fill-opacity="1" filter="url(#filter-3)" xlink:href="#path-2"></use>
+            <use fill="url(#linearGradient-1)" fill-rule="evenodd" xlink:href="#path-2"></use>
+        </g>
+        <g id="Icons" transform="translate(106.000000, 120.000000)" fill="#FFFFFF">
+            <!-- Cloud/Environment Icon -->
+            <path d="M240.267,137.000 C235.733,107.000 210.933,85.000 181.333,85.000 C164.533,85.000 149.333,92.333 138.667,104.267 C132.000,99.600 124.000,96.333 115.200,96.333 C95.467,96.333 79.467,113.333 79.467,134.583 C79.467,136.600 79.733,138.550 80.000,140.417 C65.067,148.150 54.667,165.183 54.667,184.733 C54.667,212.767 76.000,235.333 102.400,235.333 L233.867,235.333 C260.267,235.333 281.600,212.767 281.600,184.733 C281.333,161.000 263.733,141.450 240.267,137.000 Z" fill-opacity="0.9"></path>
+            
+            <!-- Leaf icon for environmental monitoring -->
+            <path d="M209.333,172.833 C207.733,169.917 205.600,167.350 202.933,165.417 C195.467,159.883 185.600,160.233 178.667,166.650 L168.000,177.167 L157.333,166.650 C150.133,160.233 140.533,159.883 133.067,165.417 C130.400,167.350 128.267,169.917 126.667,172.833 C124.000,178.133 123.467,184.217 125.333,189.867 C127.200,195.517 130.933,199.550 136.000,201.833 C138.133,203.000 140.533,203.350 142.667,203.350 C146.933,203.350 151.200,201.483 154.400,198.217 L168.000,184.800 L181.600,198.217 C184.800,201.483 189.067,203.350 193.333,203.350 C195.467,203.350 197.867,203.000 200.000,201.833 C205.067,199.550 208.800,195.517 210.667,189.867 C212.533,184.217 212.000,178.133 209.333,172.833 Z" fill-opacity="0.7"></path>
+            
+            <!-- Circular gauge elements -->
+            <circle cx="116" cy="85" r="55" fill-opacity="0.7"></circle>
+            <circle cx="116" cy="85" r="40" fill="#3498DB"></circle>
+            <rect x="111" y="46" width="10" height="40" rx="5" fill="#FFFFFF"></rect>
+
+            <!-- Additional environment indicators -->
+            <path d="M60,190 C43.431,190 30,176.569 30,160 C30,143.431 43.431,130 60,130 C76.569,130 90,143.431 90,160 C90,176.569 76.569,190 60,190 Z M60,180 C71.046,180 80,171.046 80,160 C80,148.954 71.046,140 60,140 C48.954,140 40,148.954 40,160 C40,171.046 48.954,180 60,180 Z" fill-opacity="0.6"></path>
+            
+            <path d="M240,110 C223.431,110 210,96.569 210,80 C210,63.431 223.431,50 240,50 C256.569,50 270,63.431 270,80 C270,96.569 256.569,110 240,110 Z M240,100 C251.046,100 260,91.046 260,80 C260,68.954 251.046,60 240,60 C228.954,60 220,68.954 220,80 C220,91.046 228.954,100 240,100 Z" fill-opacity="0.6"></path>
+        </g>
+    </g>
+</svg>

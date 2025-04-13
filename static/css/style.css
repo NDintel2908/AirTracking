@@ -10,12 +10,20 @@
     --text-color: #333333;
     --border-radius: 8px;
     --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --safe-area-inset-top: env(safe-area-inset-top);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom);
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    scroll-behavior: smooth;
+    height: -webkit-fill-available;
 }
 
 body {
@@ -23,12 +31,19 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    padding-top: var(--safe-area-inset-top);
+    padding-bottom: var(--safe-area-inset-bottom);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: contain;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 0.8rem;
 }
 
 /* Header styles */
@@ -290,6 +305,120 @@ footer {
     color: #666;
 }
 
+/* Mobile App Specific Styles */
+.install-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    margin-top: 0.8rem;
+    cursor: pointer;
+    display: none; /* Initially hidden, shown by JS when available */
+}
+
+.install-button:hover, 
+.install-button:active {
+    background-color: #2980b9;
+}
+
+.offline-indicator {
+    background-color: var(--warning-color);
+    color: white;
+    text-align: center;
+    padding: 0.5rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.status-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* Native App Experience */
+.bottom-nav {
+    display: none; /* Initially hidden, shown in mobile view */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--card-bg-color);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 0.5rem 0;
+    padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom));
+}
+
+.bottom-nav-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    color: #666;
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+}
+
+.nav-item i {
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+}
+
+.nav-label {
+    font-size: 0.7rem;
+}
+
+/* Refreshing animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* Pull to refresh visual indicator */
+.pull-indicator {
+    text-align: center;
+    padding: 1rem;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(-50px);
+    transition: transform 0.3s;
+}
+
+.pull-active .pull-indicator {
+    transform: translateY(0);
+}
+
 /* Media Queries for Responsive Design */
 @media (max-width: 768px) {
     .data-grid {
@@ -313,11 +442,38 @@ footer {
     .reading-value .value {
         font-size: 2rem;
     }
+    
+    .bottom-nav {
+        display: block;
+    }
+    
+    /* Add padding to the bottom of the page to accommodate the nav bar */
+    .container {
+        padding-bottom: 70px;
+    }
 }
 
 @media (max-width: 480px) {
+    body {
+        -webkit-user-select: none; /* Safari */
+        user-select: none;
+    }
+    
     .data-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.7rem;
+    }
+    
+    .container {
+        padding: 0.5rem;
+    }
+    
+    .data-card {
+        padding: 0.8rem;
+    }
+    
+    .card-value {
+        font-size: 1.3rem;
     }
     
     .parameter-details {
@@ -339,5 +495,14 @@ footer {
     
     .chart-wrapper {
         height: 200px;
+    }
+    
+    header h1 {
+        font-size: 1.3rem;
+    }
+    
+    #refresh-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
     }
 }

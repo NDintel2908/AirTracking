@@ -1,0 +1,45 @@
+{
+  "name": "Theo dõi Môi trường",
+  "short_name": "Môi Trường",
+  "description": "Ứng dụng giám sát và hiển thị dữ liệu môi trường xung quanh",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#3498db",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192x192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-512x512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Xem PM2.5",
+      "short_name": "PM2.5",
+      "description": "Xem chi tiết về chất lượng không khí PM2.5",
+      "url": "/parameter/pm25",
+      "icons": [{ "src": "/static/icons/icon-192x192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Xem nhiệt độ",
+      "short_name": "Nhiệt độ",
+      "description": "Xem chi tiết về nhiệt độ môi trường",
+      "url": "/parameter/temperature",
+      "icons": [{ "src": "/static/icons/icon-192x192.svg", "sizes": "192x192" }]
+    }
+  ],
+  "lang": "vi",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "categories": ["utilities", "productivity", "health"]
+}
