@@ -1,0 +1,116 @@
+from flask import Flask, render_template, jsonify
+import random
+import time
+from datetime import datetime, timedelta
+import os
+
+app = Flask(__name__)
+
+# Data ranges for each environmental parameter
+PARAM_RANGES = {
+    "pm10": {"min": 0, "max": 150, "unit": "μg/m³", "warning": 50, "danger": 100},
+    "pm25": {"min": 0, "max": 75, "unit": "μg/m³", "warning": 25, "danger": 50},
+    "temperature": {"min": 15, "max": 35, "unit": "°C", "warning": 30, "danger": 33},
+    "humidity": {"min": 20, "max": 90, "unit": "%", "warning": 70, "danger": 85},
+    "noise": {"min": 30, "max": 100, "unit": "dB", "warning": 70, "danger": 85},
+    "co": {"min": 0, "max": 50, "unit": "ppm", "warning": 25, "danger": 40},
+    "co2": {"min": 300, "max": 2000, "unit": "ppm", "warning": 1000, "danger": 1500}
+}
+
+# Cache to store historical data
+historical_data = {param: [] for param in PARAM_RANGES}
+
+def generate_reading(param_info):
+    """Generate a realistic reading for the given parameter"""
+    return round(random.uniform(param_info["min"], param_info["max"]), 1)
+
+def get_status(value, param_info):
+    """Determine status based on thresholds"""
+    if value >= param_info["danger"]:
+        return "danger"
+    elif value >= param_info["warning"]:
+        return "warning"
+    return "normal"
+
+def get_current_readings():
+    """Generate current readings for all parameters"""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    readings = {}
+    
+    for param, param_info in PARAM_RANGES.items():
+        value = generate_reading(param_info)
+        status = get_status(value, param_info)
+        
+        readings[param] = {
+            "value": value,
+            "unit": param_info["unit"],
+            "status": status,
+            "timestamp": timestamp
+        }
+        
+        # Store in historical data (limit to 100 data points)
+        historical_data[param].append({
+            "value": value,
+            "timestamp": timestamp
+        })
+        if len(historical_data[param]) > 100:
+            historical_data[param].pop(0)
+    
+    return readings
+
+def get_historical_data(hours=1):
+    """Generate historical data for charts"""
+    now = datetime.now()
+    data = {}
+    
+    for param in PARAM_RANGES:
+        param_data = []
+        for i in range(60):  # 60 data points (1 per minute for the last hour)
+            time_point = now - timedelta(minutes=i)
+            value = generate_reading(PARAM_RANGES[param])
+            param_data.append({
+                "timestamp": time_point.strftime("%H:%M"),
+                "value": value
+            })
+        # Reverse to have chronological order
+        data[param] = list(reversed(param_data))
+    
+    return data
+
+@app.route('/')
+def index():
+    """Render the main dashboard"""
+    return render_template('index.html', parameters=PARAM_RANGES)
+
+@app.route('/parameter/<param_name>')
+def parameter_detail(param_name):
+    """Render the detailed view for a specific parameter"""
+    if param_name not in PARAM_RANGES:
+        return "Parameter not found", 404
+    
+    param_info = PARAM_RANGES[param_name]
+    param_info["name"] = param_name
+    return render_template('parameter.html', parameter=param_info)
+
+@app.route('/api/current')
+def api_current():
+    """API endpoint for current readings"""
+    return jsonify(get_current_readings())
+
+@app.route('/api/historical')
+def api_historical():
+    """API endpoint for historical data"""
+    return jsonify(get_historical_data())
+
+@app.route('/api/historical/<param_name>')
+def api_param_historical(param_name):
+    """API endpoint for historical data of a specific parameter"""
+    if param_name not in PARAM_RANGES:
+        return jsonify({"error": "Parameter not found"}), 404
+    
+    history = get_historical_data()
+    return jsonify(history[param_name])
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

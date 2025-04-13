@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Environmental Monitoring</h1>
+            <div class="refresh">
+                <button id="refresh-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                <span id="last-updated"></span>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <div class="data-grid" id="data-grid">
+                <!-- Data cards will be inserted here by JavaScript -->
+                <div class="loading">Loading data...</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2>Overview Chart</h2>
+            <div class="chart-selector">
+                <label for="chart-param">Parameter:</label>
+                <select id="chart-param">
+                    <option value="pm10">PM10</option>
+                    <option value="pm25">PM2.5</option>
+                    <option value="temperature">Temperature</option>
+                    <option value="humidity">Humidity</option>
+                    <option value="noise">Noise</option>
+                    <option value="co">CO</option>
+                    <option value="co2">CO2</option>
+                </select>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="main-chart"></canvas>
+            </div>
+        </div>
+
+        <footer>
+            <p>Environmental Monitoring Dashboard &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

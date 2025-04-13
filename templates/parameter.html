@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ parameter.name.upper() }} - Environmental Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="back-link">
+                <a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            </div>
+            <h1>{{ parameter.name.upper() }} Details</h1>
+            <div class="refresh">
+                <button id="refresh-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                <span id="last-updated"></span>
+            </div>
+        </header>
+
+        <div class="parameter-details">
+            <div class="current-reading" id="current-reading">
+                <div class="loading">Loading current data...</div>
+            </div>
+
+            <div class="parameter-info">
+                <h3>About {{ parameter.name.upper() }}</h3>
+                <table>
+                    <tr>
+                        <td>Unit:</td>
+                        <td>{{ parameter.unit }}</td>
+                    </tr>
+                    <tr>
+                        <td>Warning Level:</td>
+                        <td>{{ parameter.warning }} {{ parameter.unit }}</td>
+                    </tr>
+                    <tr>
+                        <td>Danger Level:</td>
+                        <td>{{ parameter.danger }} {{ parameter.unit }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2>{{ parameter.name.upper() }} History</h2>
+            <div class="chart-wrapper">
+                <canvas id="param-chart"></canvas>
+            </div>
+        </div>
+
+        <footer>
+            <p>Environmental Monitoring Dashboard &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        // Pass parameter info to JavaScript
+        const parameterName = "{{ parameter.name }}";
+        const parameterUnit = "{{ parameter.unit }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize
+            updateLastUpdated();
+            fetchCurrentReading();
+            fetchParameterHistory();
+
+            // Set up refresh button
+            document.getElementById('refresh-btn').addEventListener('click', () => {
+                fetchCurrentReading();
+                fetchParameterHistory();
+            });
+
+            // Auto refresh every 30 seconds
+            setInterval(() => {
+                fetchCurrentReading();
+                fetchParameterHistory();
+            }, 30000);
+
+            function updateLastUpdated() {
+                const now = new Date();
+                document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+            }
+
+            function fetchCurrentReading() {
+                fetch('/api/current')
+                    .then(response => response.json())
+                    .then(data => {
+                        const reading = data[parameterName];
+                        const readingElement = document.getElementById('current-reading');
+                        
+                        readingElement.innerHTML = `
+                            <div class="reading-value ${reading.status}">
+                                <span class="value">${reading.value}</span>
+                                <span class="unit">${reading.unit}</span>
+                            </div>
+                            <div class="reading-status ${reading.status}">
+                                Status: ${reading.status.toUpperCase()}
+                            </div>
+                        `;
+                        
+                        updateLastUpdated();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching current reading:', error);
+                        document.getElementById('current-reading').innerHTML = 
+                            '<div class="error">Error loading data. Please try again.</div>';
+                    });
+            }
+
+            function fetchParameterHistory() {
+                fetch(`/api/historical/${parameterName}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const labels = data.map(point => point.timestamp);
+                        const values = data.map(point => point.value);
+                        
+                        updateParameterChart(labels, values);
+                        updateLastUpdated();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching parameter history:', error);
+                    });
+            }
+
+            function updateParameterChart(labels, values) {
+                const ctx = document.getElementById('param-chart').getContext('2d');
+                
+                // Destroy existing chart if it exists
+                if (window.parameterChart) {
+                    window.parameterChart.destroy();
+                }
+                
+                window.parameterChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `${parameterName.toUpperCase()} (${parameterUnit})`,
+                            data: values,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
