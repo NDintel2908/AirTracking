@@ -42,13 +42,13 @@ PM10_BREAKPOINTS = [
 # Bảng quy chuẩn VN_AQI cho CO (mg/m³), dùng cho dữ liệu tức thời thay vì trung bình 8h
 # Lưu ý: Đầu vào của CO được chuyển đổi từ ppm sang mg/m³
 CO_BREAKPOINTS = [
-    {"c_low": 0, "c_high": 10, "i_low": 0, "i_high": 50},
-    {"c_low": 10.1, "c_high": 30, "i_low": 51, "i_high": 100},
-    {"c_low": 30.1, "c_high": 45, "i_low": 101, "i_high": 150},
-    {"c_low": 45.1, "c_high": 60, "i_low": 151, "i_high": 200},
-    {"c_low": 60.1, "c_high": 90, "i_low": 201, "i_high": 300},
-    {"c_low": 90.1, "c_high": 120, "i_low": 301, "i_high": 400},
-    {"c_low": 120.1, "c_high": 150, "i_low": 401, "i_high": 500}
+    {"c_low": 0, "c_high": 5, "i_low": 0, "i_high": 50},      # Tốt
+    {"c_low": 5.1, "c_high": 10, "i_low": 51, "i_high": 100},  # Trung bình
+    {"c_low": 10.1, "c_high": 17, "i_low": 101, "i_high": 150}, # Kém
+    {"c_low": 17.1, "c_high": 35, "i_low": 151, "i_high": 200}, # Xấu
+    {"c_low": 35.1, "c_high": 50, "i_low": 201, "i_high": 300}, # Rất xấu
+    {"c_low": 50.1, "c_high": 120, "i_low": 301, "i_high": 400}, # Nguy hại
+    {"c_low": 120.1, "c_high": 150, "i_low": 401, "i_high": 500} # Nguy hại
 ]
 
 # Màu sắc và mô tả cho các mức AQI
