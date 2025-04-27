@@ -1,8 +1,13 @@
 import os
 import time
 import threading
+import logging
 from app import app, socketio
-import thingsboard_mqtt_client as thingsboard_client
+import thingsboard_client as tb_jwt
+
+# Cấu hình logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('run')
 
 # Hàm gửi dữ liệu cập nhật qua SocketIO
 def send_updates():
@@ -10,25 +15,23 @@ def send_updates():
     Gửi cập nhật dữ liệu theo thời gian thực qua SocketIO
     """
     print("Bắt đầu luồng cập nhật dữ liệu thời gian thực...")
-    # Khởi tạo client MQTT
-    thingsboard_client.initialize_mqtt_client()
     
     while True:
         try:
-            # Lấy dữ liệu hiện tại từ MQTT client
-            data = thingsboard_client.get_current_readings()
+            # Lấy dữ liệu hiện tại từ JWT client
+            data = tb_jwt.get_current_readings()
             
             # Gửi dữ liệu qua SocketIO
             socketio.emit('data_update', {'data': data, 'timestamp': time.time()})
             
             # Kiểm tra trạng thái kết nối ThingsBoard
-            tb_status = thingsboard_client.test_connection()
+            tb_status = tb_jwt.test_connection()   
             socketio.emit('thingsboard_status', {'connected': tb_status})
             
             # Đợi 5 giây trước khi cập nhật tiếp
             time.sleep(5)
         except Exception as e:
-            print(f"Lỗi khi gửi cập nhật: {str(e)}")
+            logger.error(f"Lỗi khi gửi cập nhật: {str(e)}")
             time.sleep(5)
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import os
 import ssl
 import requests
+import threading
 
 # Cấu hình logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -14,7 +15,9 @@ logger = logging.getLogger('thingsboard_mqtt_client')
 # Cấu hình ThingsBoard
 THINGSBOARD_CONFIG = {
     'host': 'demo.thingsboard.io',
-    'port': 443,  # HTTPS port for REST API
+    'mqtt_port': 1883,  # MQTT non-secure port
+    'mqtt_ssl_port': 8883,  # MQTT secure port
+    'http_port': 443,  # HTTPS port for REST API
     'device_id': '66ae3560-bd24-11ef-af67-a38a7671daf5',
     'access_token': os.environ.get('THINGSBOARD_ACCESS_TOKEN', 'DATN'),
     'dashboard_id': '0c0e97d0-bd24-11ef-af67-a38a7671daf5'
@@ -25,6 +28,11 @@ _data_cache = {
     'current': {'data': None, 'timestamp': 0},
     'historical': {'data': None, 'timestamp': 0}
 }
+
+# Kết nối MQTT client
+mqtt_client = None
+mqtt_connected = False
+mqtt_lock = threading.Lock()
 
 # Phạm vi cục bộ cho các tham số
 PARAM_RANGES = {
@@ -112,17 +120,92 @@ def on_message(client, userdata, msg):
     except Exception as e:
         logger.error(f"Error processing MQTT message: {e}")
 
-# Khởi tạo MQTT client
-mqtt_client = None
+# Khởi tạo MQTT client và kết nối
+def start_mqtt_connection():
+    """
+    Khởi tạo kết nối MQTT với ThingsBoard.
+    Lưu ý: Kết nối MQTT có thể không hoạt động trong môi trường Replit do các hạn chế cổng kết nối.
+    """
+    global mqtt_client, mqtt_connected
+    
+    with mqtt_lock:
+        if mqtt_client is not None:
+            try:
+                mqtt_client.disconnect()
+            except:
+                pass
+            mqtt_client = None
+            mqtt_connected = False
+        
+        try:
+            # Khởi tạo MQTT client mới
+            client_id = f"python-mqtt-{THINGSBOARD_CONFIG['device_id']}"
+            mqtt_client = mqtt.Client(client_id=client_id)
+            
+            # Thiết lập token xác thực
+            access_token = THINGSBOARD_CONFIG['access_token']
+            mqtt_client.username_pw_set(access_token)
+            
+            # Đăng ký các callback
+            mqtt_client.on_connect = on_connect
+            mqtt_client.on_message = on_message
+            mqtt_client.on_disconnect = on_disconnect
+            
+            # Thiết lập TLS/SSL
+            try:
+                mqtt_client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
+                
+                # Thử kết nối với TLS
+                mqtt_client.connect(THINGSBOARD_CONFIG['host'], 
+                                   THINGSBOARD_CONFIG['mqtt_ssl_port'], 
+                                   keepalive=60)
+                mqtt_client.loop_start()
+                mqtt_connected = True
+                logger.info("Started MQTT client with SSL")
+                return True
+            except Exception as ssl_err:
+                logger.warning(f"Error connecting with TLS: {ssl_err}, trying non-secure connection")
+                
+                # Thử lại với kết nối không bảo mật
+                try:
+                    mqtt_client = mqtt.Client(client_id=client_id)
+                    mqtt_client.username_pw_set(access_token)
+                    mqtt_client.on_connect = on_connect
+                    mqtt_client.on_message = on_message
+                    mqtt_client.on_disconnect = on_disconnect
+                    
+                    mqtt_client.connect(THINGSBOARD_CONFIG['host'], 
+                                       THINGSBOARD_CONFIG['mqtt_port'], 
+                                       keepalive=60)
+                    mqtt_client.loop_start()
+                    mqtt_connected = True
+                    logger.info("Started MQTT client without SSL")
+                    return True
+                except Exception as e:
+                    logger.error(f"Failed to connect with non-secure MQTT: {e}")
+                    mqtt_connected = False
+                    return False
+        except Exception as e:
+            logger.error(f"Error initializing MQTT client: {e}")
+            mqtt_connected = False
+            return False
 
 def initialize_mqtt_client():
     """
-    Khởi tạo kết nối HTTP API với ThingsBoard thay vì MQTT
-    Vì môi trường Replit không cho phép kết nối MQTT, chúng ta sẽ sử dụng HTTP API
+    Khởi tạo kết nối với ThingsBoard.
+    Cố gắng sử dụng MQTT trước, nếu không thành công thì chuyển sang HTTP API
     """
+    # Thử kết nối MQTT
+    if start_mqtt_connection():
+        logger.info("Successfully connected to ThingsBoard via MQTT")
+        return True
+    else:
+        logger.warning("Failed to connect via MQTT, falling back to HTTP API")
+    
+    # Nếu MQTT không thành công, thử với HTTP API
     try:
-        # Sử dụng API truy cập thiết bị trực tiếp với token "DATN"
-        token = "DATN"  # Sử dụng trực tiếp token mà không thông qua biến môi trường
+        # Lấy token từ biến môi trường hoặc dùng giá trị mặc định
+        token = THINGSBOARD_CONFIG['access_token']
         url = f"https://{THINGSBOARD_CONFIG['host']}/api/v1/{token}/telemetry"
         
         logger.info(f"Testing device HTTP API connection to ThingsBoard: {url}")
@@ -162,10 +245,25 @@ def initialize_mqtt_client():
 
 def stop_mqtt_client():
     """
-    Function này được giữ lại để tương thích với mã nguồn cũ
-    Không còn thực sự cần thiết vì chúng ta đã chuyển sang sử dụng HTTP API
+    Dừng kết nối MQTT client nếu đang kết nối
     """
-    logger.info("HTTP API client does not need to be stopped")
+    global mqtt_client, mqtt_connected
+    
+    with mqtt_lock:
+        if mqtt_client is not None:
+            try:
+                logger.info("Stopping MQTT client")
+                mqtt_client.loop_stop()
+                mqtt_client.disconnect()
+                mqtt_connected = False
+                mqtt_data_store['connected'] = False
+                logger.info("MQTT client stopped successfully")
+            except Exception as e:
+                logger.error(f"Error stopping MQTT client: {e}")
+            finally:
+                mqtt_client = None
+        else:
+            logger.info("No active MQTT client to stop")
 
 def _get_status(value, param_info):
     """Hàm nội bộ để xác định trạng thái dựa trên ngưỡng"""
