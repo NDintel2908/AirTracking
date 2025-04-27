@@ -147,6 +147,67 @@ document.addEventListener('DOMContentLoaded', function() {
         const dataGrid = document.getElementById('data-grid');
         dataGrid.innerHTML = '';
 
+        // Kiểm tra và hiển thị trạng thái thiết bị
+        if (data.device_status) {
+            // Tạo thẻ div hiển thị trạng thái thiết bị
+            const deviceStatusCard = document.createElement('div');
+            deviceStatusCard.className = 'device-status-card';
+            
+            let statusClass = '';
+            let statusMessage = '';
+            let statusIcon = '';
+            
+            switch(data.device_status) {
+                case 'online':
+                    statusClass = 'online';
+                    statusMessage = 'Thiết bị đang hoạt động bình thường';
+                    statusIcon = 'fa-check-circle';
+                    break;
+                case 'inactive':
+                    statusClass = 'inactive';
+                    statusMessage = 'Thiết bị không hoạt động (không có dữ liệu mới)';
+                    statusIcon = 'fa-exclamation-circle';
+                    break;
+                case 'offline':
+                    statusClass = 'offline';
+                    statusMessage = 'Thiết bị ngắt kết nối';
+                    statusIcon = 'fa-times-circle';
+                    break;
+                default:
+                    statusClass = 'unknown';
+                    statusMessage = 'Không xác định được trạng thái thiết bị';
+                    statusIcon = 'fa-question-circle';
+            }
+            
+            // Tính thời gian từ lần cập nhật cuối cùng
+            let lastUpdateInfo = '';
+            if (data.last_data_timestamp) {
+                const lastUpdateTime = new Date(data.last_data_timestamp);
+                const currentTime = new Date();
+                const timeDiffMinutes = Math.floor((currentTime - lastUpdateTime) / (1000 * 60));
+                
+                if (timeDiffMinutes < 60) {
+                    lastUpdateInfo = `Dữ liệu cuối cập nhật: ${timeDiffMinutes} phút trước`;
+                } else {
+                    const hours = Math.floor(timeDiffMinutes / 60);
+                    const minutes = timeDiffMinutes % 60;
+                    lastUpdateInfo = `Dữ liệu cuối cập nhật: ${hours} giờ ${minutes} phút trước`;
+                }
+            }
+            
+            deviceStatusCard.innerHTML = `
+                <div class="status-icon ${statusClass}">
+                    <i class="fas ${statusIcon}"></i>
+                </div>
+                <div class="status-info">
+                    <div class="status-message ${statusClass}">${statusMessage}</div>
+                    <div class="last-update-time">${lastUpdateInfo}</div>
+                </div>
+            `;
+            
+            dataGrid.appendChild(deviceStatusCard);
+        }
+
         // Parameter to icon mapping
         const paramIcons = {
             'pm10': 'fa-cloud',
@@ -174,10 +235,17 @@ document.addEventListener('DOMContentLoaded', function() {
             'normal': 'BÌNH THƯỜNG',
             'warning': 'CẢNH BÁO',
             'danger': 'NGUY HIỂM',
-            'offline': 'NGOẠI TUYẾN'
+            'offline': 'NGOẠI TUYẾN',
+            'unknown': 'KHÔNG CÓ DỮ LIỆU'
         };
 
+        // Xử lý dữ liệu từng tham số
         for (const [param, reading] of Object.entries(data)) {
+            // Bỏ qua các trường đặc biệt không phải dữ liệu cảm biến
+            if (param === 'device_status' || param === 'last_data_timestamp') {
+                continue;
+            }
+            
             const card = document.createElement('div');
             card.className = 'data-card';
             
@@ -189,15 +257,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 statusIndicator = `<span class="status-badge ${reading.status}"></span>`;
             }
             
+            // Kiểm tra nếu có thông báo thay vì giá trị
+            let valueDisplay = '';
+            if (reading.message) {
+                valueDisplay = `<div class="card-message">${reading.message}</div>`;
+            } else {
+                valueDisplay = `
+                    <div class="card-value">${reading.value !== null ? reading.value : '--'}</div>
+                    <div class="card-unit">${reading.unit}</div>
+                `;
+            }
+            
             card.innerHTML = `
                 <div class="card-title">
                     <i class="fas ${paramIcons[param]}"></i> ${paramNames[param]}
                     ${statusIndicator}
                 </div>
-                <div class="card-value">${reading.value}</div>
-                <div class="card-unit">${reading.unit}</div>
+                ${valueDisplay}
                 <div class="card-status ${reading.status}">
                     ${statusText}
+                </div>
+                <div class="card-timestamp">
+                    Cập nhật: ${reading.timestamp}
                 </div>
             `;
             

@@ -214,8 +214,11 @@ def format_current_data(data):
         "co2": {"min": 300, "max": 2000, "unit": "ppm", "warning": 1000, "danger": 1500}
     }
     
-    timestamp = datetime.now().strftime("%H:%M:%S")
+    # Lấy thời gian hiện tại
+    current_time = datetime.now().strftime("%H:%M:%S")
     readings = {}
+    device_status = "online"
+    last_data_update = None
     
     # Ánh xạ giữa tên tham số ThingsBoard và ứng dụng
     param_mapping = {
@@ -232,33 +235,57 @@ def format_current_data(data):
     for tb_param, app_param in param_mapping.items():
         if tb_param in data and data[tb_param] and len(data[tb_param]) > 0:
             try:
+                ts = data[tb_param][0]['ts']
+                # Lưu lại timestamp mới nhất
+                if last_data_update is None or ts > last_data_update:
+                    last_data_update = ts
+                
                 value = float(data[tb_param][0]['value'])
                 param_info = param_ranges[app_param]
                 status = _get_status(value, param_info)
+                
+                # Chuyển đổi timestamp của ThingsBoard sang định dạng giờ:phút:giây
+                tb_timestamp = datetime.fromtimestamp(ts / 1000).strftime("%H:%M:%S")
                 
                 readings[app_param] = {
                     "value": value,
                     "unit": param_info["unit"],
                     "status": status,
-                    "timestamp": timestamp
+                    "timestamp": tb_timestamp,
+                    "last_update": ts
                 }
             except (KeyError, ValueError, IndexError) as e:
                 logger.error(f"Error processing {tb_param} data: {str(e)}")
     
-    # Nếu không có dữ liệu từ ThingsBoard, tạo dữ liệu giả cho các tham số còn thiếu
-    import random
+    # Kiểm tra xem thiết bị có hoạt động không dựa trên thời gian dữ liệu mới nhất
+    if last_data_update:
+        # Tính thời gian trễ (phút) giữa thời gian hiện tại và thời gian cập nhật dữ liệu gần nhất
+        current_ts = datetime.now().timestamp() * 1000  # Chuyển đổi sang milliseconds
+        time_diff_minutes = (current_ts - last_data_update) / (1000 * 60)  # Chuyển đổi sang phút
+        
+        # Nếu dữ liệu không được cập nhật trong 15 phút, coi như thiết bị offline
+        if time_diff_minutes > 15:
+            device_status = "offline"
+        # Nếu dữ liệu không được cập nhật trong 5 phút, coi như thiết bị không hoạt động
+        elif time_diff_minutes > 5:
+            device_status = "inactive"
+    else:
+        device_status = "unknown"
     
+    # Thêm các tham số còn thiếu với thông báo không có dữ liệu
     for param, param_info in param_ranges.items():
         if param not in readings:
-            value = round(random.uniform(param_info["min"], param_info["max"]), 1)
-            status = _get_status(value, param_info)
-            
             readings[param] = {
-                "value": value,
+                "value": None,
                 "unit": param_info["unit"],
-                "status": status,
-                "timestamp": timestamp
+                "status": "unknown",
+                "timestamp": current_time,
+                "message": "Không có dữ liệu"
             }
+            
+    # Thêm trạng thái thiết bị vào kết quả
+    readings['device_status'] = device_status
+    readings['last_data_timestamp'] = last_data_update
     
     return readings
 

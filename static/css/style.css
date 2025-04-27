@@ -339,6 +339,85 @@ header h1 {
     color: var(--danger-color);
 }
 
+/* Device Status Card Styles */
+.device-status-card {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    background-color: var(--card-bg-color);
+    box-shadow: var(--box-shadow);
+}
+
+.device-status-card .status-icon {
+    margin-right: 15px;
+    font-size: 1.8rem;
+}
+
+.device-status-card .status-icon.online {
+    color: var(--normal-color);
+}
+
+.device-status-card .status-icon.inactive {
+    color: var(--warning-color);
+}
+
+.device-status-card .status-icon.offline {
+    color: var(--danger-color);
+}
+
+.device-status-card .status-icon.unknown {
+    color: #7f8c8d;
+}
+
+.device-status-card .status-info {
+    flex: 1;
+}
+
+.device-status-card .status-message {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.device-status-card .status-message.online {
+    color: var(--normal-color);
+}
+
+.device-status-card .status-message.inactive {
+    color: var(--warning-color);
+}
+
+.device-status-card .status-message.offline {
+    color: var(--danger-color);
+}
+
+.device-status-card .status-message.unknown {
+    color: #7f8c8d;
+}
+
+.device-status-card .last-update-time {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}
+
+.card-timestamp {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.card-message {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+}
+
 /* Footer */
 footer {
     text-align: center;
