@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Thêm hàm cập nhật dữ liệu để có thể sử dụng từ Socket.IO
+    window.updateDataDisplay = function(data) {
+        renderDataCards(data);
+        updateLastUpdated();
+    };
     // Kiểm tra trạng thái kết nối
     function updateOnlineStatus() {
         const offlineIndicator = document.getElementById('offline-indicator');
@@ -108,11 +113,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fetchCurrentData() {
+        const refreshIcon = document.querySelector('#refresh-btn i');
+        if (refreshIcon) {
+            refreshIcon.classList.add('spinning');
+        }
+        
         fetch('/api/current')
             .then(response => response.json())
             .then(data => {
-                renderDataCards(data);
-                updateLastUpdated();
+                updateDataDisplay(data);
+                if (refreshIcon) {
+                    refreshIcon.classList.remove('spinning');
+                }
             })
             .catch(error => {
                 console.error('Lỗi tải dữ liệu:', error);
@@ -123,6 +135,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!navigator.onLine) {
                     document.getElementById('data-grid').innerHTML = 
                         '<div class="error">Bạn đang ở chế độ ngoại tuyến. Vui lòng kiểm tra kết nối mạng.</div>';
+                }
+                
+                if (refreshIcon) {
+                    refreshIcon.classList.remove('spinning');
                 }
             });
     }

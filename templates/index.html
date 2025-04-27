@@ -102,9 +102,73 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/register-sw.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/services/thingsboard-api.js') }}"></script>
+    
+    <!-- Script Socket.IO cho dữ liệu thời gian thực -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kết nối Socket.IO với cấu hình kết nối lại tự động
+            const socket = io({
+                reconnection: true,
+                reconnectionAttempts: Infinity,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
+                timeout: 20000
+            });
+            
+            // Lắng nghe sự kiện cập nhật dữ liệu
+            socket.on('data_update', function(data) {
+                console.log('Nhận dữ liệu thời gian thực:', data);
+                
+                // Cập nhật giao diện với dữ liệu mới
+                if (window.updateDataDisplay && typeof window.updateDataDisplay === 'function') {
+                    window.updateDataDisplay(data.data);
+                    document.getElementById('last-updated').textContent = 
+                        `Cập nhật lúc: ${new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit', second:'2-digit'})}`;
+                }
+            });
+            
+            // Lắng nghe sự kiện cập nhật trạng thái ThingsBoard
+            socket.on('thingsboard_status', function(data) {
+                console.log('Trạng thái ThingsBoard:', data);
+                
+                const statusElement = document.getElementById('data-source-status');
+                
+                if (data.connected) {
+                    statusElement.textContent = 'ThingsBoard API (Kết nối thành công)';
+                    statusElement.className = 'connected';
+                } else {
+                    statusElement.textContent = 'Dữ liệu giả lập (Không thể kết nối ThingsBoard)';
+                    statusElement.className = 'disconnected';
+                }
+            });
+            
+            // Kiểm tra kết nối Socket.IO
+            socket.on('connect', function() {
+                console.log('Đã kết nối Socket.IO');
+            });
+            
+            socket.on('disconnect', function() {
+                console.log('Mất kết nối Socket.IO');
+                
+                // Thử kết nối lại sau 2 giây
+                setTimeout(function() {
+                    socket.connect();
+                }, 2000);
+            });
+            
+            socket.on('connect_error', function(error) {
+                console.error('Lỗi kết nối Socket.IO:', error);
+            });
+            
+            socket.on('reconnect', function(attemptNumber) {
+                console.log('Đã kết nối lại Socket.IO sau', attemptNumber, 'lần thử');
+            });
+        });
+    </script>
 </body>
 </html>

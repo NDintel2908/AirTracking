@@ -14,7 +14,8 @@ THINGSBOARD_CONFIG = {
     'url': 'https://demo.thingsboard.io',
     'dashboard_id': '0c0e97d0-bd24-11ef-af67-a38a7671daf5',
     'access_token': os.environ.get('THINGSBOARD_ACCESS_TOKEN', ''),
-    'device_id': '66ae3560-bd24-11ef-af67-a38a7671daf5'
+    'device_id': '66ae3560-bd24-11ef-af67-a38a7671daf5',
+    'jwt_token': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyMDEzOTAwMkBzdHVkZW50LmhjbXV0ZS5lZHUudm4iLCJ1c2VySWQiOiI2MzdlMjA5MC1iZDIzLTExZWYtYWY2Ny1hMzhhNzY3MWRhZjUiLCJzY29wZXMiOlsiVEVOQU5UX0FETUlOIl0sInNlc3Npb25JZCI6ImU2NDI4YTdiLTVmNWYtNGY5Yi1hOThkLWZlMDJmMjFiNjMxNCIsImV4cCI6MTc0NzA0ODEwOCwiaXNzIjoidGhpbmdzYm9hcmQuaW8iLCJpYXQiOjE3NDUyNDgxMDgsImZpcnN0TmFtZSI6IlVFVCIsImxhc3ROYW1lIjoiVUVUIiwiZW5hYmxlZCI6dHJ1ZSwicHJpdmFjeVBvbGljeUFjY2VwdGVkIjp0cnVlLCJpc1B1YmxpYyI6ZmFsc2UsInRlbmFudElkIjoiNjE4YzYyYjAtYmQyMy0xMWVmLWFmNjctYTM4YTc2NzFkYWY1IiwiY3VzdG9tZXJJZCI6IjEzODE0MDAwLTFkZDItMTFiMi04MDgwLTgwODA4MDgwODA4MCJ9.EEEHbpy53WcvvxjDLwUV_xQaBXSNJgvINru2GEwjxAaGPToJtRP53mL7uYbYfNKvoRcCvZaKOVLImLT9ikmReg'
 }
 
 # Cache để lưu trữ dữ liệu lịch sử và tránh gọi API quá nhiều
@@ -26,6 +27,45 @@ _data_cache = {
 # Thời gian hết hạn cache (60 giây)
 CACHE_EXPIRY = 60
 
+
+def _generate_fallback_readings():
+    """
+    Tạo dữ liệu giả khi không thể kết nối với ThingsBoard
+    """
+    import random
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    readings = {}
+    
+    # Dữ liệu phạm vi cho các tham số
+    param_ranges = {
+        "pm10": {"min": 0, "max": 150, "unit": "μg/m³", "warning": 50, "danger": 100},
+        "pm25": {"min": 0, "max": 75, "unit": "μg/m³", "warning": 25, "danger": 50},
+        "temperature": {"min": 15, "max": 35, "unit": "°C", "warning": 30, "danger": 33},
+        "humidity": {"min": 20, "max": 90, "unit": "%", "warning": 70, "danger": 85},
+        "noise": {"min": 30, "max": 100, "unit": "dB", "warning": 70, "danger": 85},
+        "co": {"min": 0, "max": 50, "unit": "ppm", "warning": 25, "danger": 40},
+        "co2": {"min": 300, "max": 2000, "unit": "ppm", "warning": 1000, "danger": 1500}
+    }
+    
+    for param, param_info in param_ranges.items():
+        value = round(random.uniform(param_info["min"], param_info["max"]), 1)
+        
+        # Xác định trạng thái
+        if value >= param_info["danger"]:
+            status = "danger"
+        elif value >= param_info["warning"]:
+            status = "warning"
+        else:
+            status = "normal"
+        
+        readings[param] = {
+            "value": value,
+            "unit": param_info["unit"],
+            "status": status,
+            "timestamp": timestamp
+        }
+    
+    return readings
 
 def get_current_readings():
     """
@@ -40,11 +80,15 @@ def get_current_readings():
     
     # Không có cache hợp lệ, gọi API
     try:
-        # Sử dụng token trực tiếp trong URL thay vì header
-        url = f"{THINGSBOARD_CONFIG['url']}/api/plugins/telemetry/DEVICE/{THINGSBOARD_CONFIG['device_id']}/values/timeseries?token={THINGSBOARD_CONFIG['access_token']}"
+        # Sử dụng JWT token trong header thay vì token trong URL
+        url = f"{THINGSBOARD_CONFIG['url']}/api/plugins/telemetry/DEVICE/{THINGSBOARD_CONFIG['device_id']}/values/timeseries"
+        headers = {
+            'X-Authorization': THINGSBOARD_CONFIG['jwt_token'],
+            'Content-Type': 'application/json'
+        }
         
-        logger.info(f"Requesting current data from URL: {url}")
-        response = requests.get(url)
+        logger.info(f"Requesting current data with JWT from URL: {url}")
+        response = requests.get(url, headers=headers)
         
         # Kiểm tra lỗi HTTP
         if response.status_code != 200:
@@ -69,22 +113,8 @@ def get_current_readings():
             logger.info("Returning stale cached data due to API error")
             return _data_cache['current']['data']
         
-        # Nếu không có cache, tạo dữ liệu giả (tương tự như code cũ)
-        from app import PARAM_RANGES, generate_reading, get_status
-        
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        readings = {}
-        
-        for param, param_info in PARAM_RANGES.items():
-            value = generate_reading(param_info)
-            status = get_status(value, param_info)
-            
-            readings[param] = {
-                "value": value,
-                "unit": param_info["unit"],
-                "status": status,
-                "timestamp": timestamp
-            }
+        # Nếu không có cache, tạo dữ liệu giả
+        readings = _generate_fallback_readings()
         
         logger.info("Generated fallback data due to API error")
         return readings
@@ -106,11 +136,15 @@ def get_historical_data(hours=1):
         end_ts = int(time.time() * 1000)  # Thời gian hiện tại tính bằng mili giây
         start_ts = end_ts - (hours * 60 * 60 * 1000)  # hours giờ trước
         
-        # Sử dụng token trực tiếp trong URL thay vì header
-        url = f"{THINGSBOARD_CONFIG['url']}/api/plugins/telemetry/DEVICE/{THINGSBOARD_CONFIG['device_id']}/values/timeseries?startTs={start_ts}&endTs={end_ts}&token={THINGSBOARD_CONFIG['access_token']}"
+        # Sử dụng JWT token trong header thay vì token trong URL
+        url = f"{THINGSBOARD_CONFIG['url']}/api/plugins/telemetry/DEVICE/{THINGSBOARD_CONFIG['device_id']}/values/timeseries?startTs={start_ts}&endTs={end_ts}"
+        headers = {
+            'X-Authorization': THINGSBOARD_CONFIG['jwt_token'],
+            'Content-Type': 'application/json'
+        }
         
-        logger.info(f"Requesting historical data from URL: {url}")
-        response = requests.get(url)
+        logger.info(f"Requesting historical data with JWT from URL: {url}")
+        response = requests.get(url, headers=headers)
         
         # Kiểm tra lỗi HTTP
         if response.status_code != 200:
@@ -157,11 +191,28 @@ def get_historical_data(hours=1):
         return data
 
 
+def _get_status(value, param_info):
+    """Hàm nội bộ để xác định trạng thái dựa trên ngưỡng"""
+    if value >= param_info["danger"]:
+        return "danger"
+    elif value >= param_info["warning"]:
+        return "warning"
+    return "normal"
+
 def format_current_data(data):
     """
     Chuyển đổi dữ liệu hiện tại từ ThingsBoard sang định dạng của ứng dụng
     """
-    from app import PARAM_RANGES, get_status
+    # Sử dụng các phạm vi cục bộ thay vì import PARAM_RANGES từ app
+    param_ranges = {
+        "pm10": {"min": 0, "max": 150, "unit": "μg/m³", "warning": 50, "danger": 100},
+        "pm25": {"min": 0, "max": 75, "unit": "μg/m³", "warning": 25, "danger": 50},
+        "temperature": {"min": 15, "max": 35, "unit": "°C", "warning": 30, "danger": 33},
+        "humidity": {"min": 20, "max": 90, "unit": "%", "warning": 70, "danger": 85},
+        "noise": {"min": 30, "max": 100, "unit": "dB", "warning": 70, "danger": 85},
+        "co": {"min": 0, "max": 50, "unit": "ppm", "warning": 25, "danger": 40},
+        "co2": {"min": 300, "max": 2000, "unit": "ppm", "warning": 1000, "danger": 1500}
+    }
     
     timestamp = datetime.now().strftime("%H:%M:%S")
     readings = {}
@@ -182,8 +233,8 @@ def format_current_data(data):
         if tb_param in data and data[tb_param] and len(data[tb_param]) > 0:
             try:
                 value = float(data[tb_param][0]['value'])
-                param_info = PARAM_RANGES[app_param]
-                status = get_status(value, param_info)
+                param_info = param_ranges[app_param]
+                status = _get_status(value, param_info)
                 
                 readings[app_param] = {
                     "value": value,
@@ -195,12 +246,12 @@ def format_current_data(data):
                 logger.error(f"Error processing {tb_param} data: {str(e)}")
     
     # Nếu không có dữ liệu từ ThingsBoard, tạo dữ liệu giả cho các tham số còn thiếu
-    from app import generate_reading
+    import random
     
-    for param, param_info in PARAM_RANGES.items():
+    for param, param_info in param_ranges.items():
         if param not in readings:
-            value = generate_reading(param_info)
-            status = get_status(value, param_info)
+            value = round(random.uniform(param_info["min"], param_info["max"]), 1)
+            status = _get_status(value, param_info)
             
             readings[param] = {
                 "value": value,
@@ -216,7 +267,16 @@ def format_historical_data(data):
     """
     Chuyển đổi dữ liệu lịch sử từ ThingsBoard sang định dạng của ứng dụng
     """
-    from app import PARAM_RANGES
+    # Sử dụng các phạm vi cục bộ thay vì import từ app
+    param_ranges = {
+        "pm10": {"min": 0, "max": 150, "unit": "μg/m³", "warning": 50, "danger": 100},
+        "pm25": {"min": 0, "max": 75, "unit": "μg/m³", "warning": 25, "danger": 50},
+        "temperature": {"min": 15, "max": 35, "unit": "°C", "warning": 30, "danger": 33},
+        "humidity": {"min": 20, "max": 90, "unit": "%", "warning": 70, "danger": 85},
+        "noise": {"min": 30, "max": 100, "unit": "dB", "warning": 70, "danger": 85},
+        "co": {"min": 0, "max": 50, "unit": "ppm", "warning": 25, "danger": 40},
+        "co2": {"min": 300, "max": 2000, "unit": "ppm", "warning": 1000, "danger": 1500}
+    }
     
     formatted_data = {}
     
@@ -252,16 +312,16 @@ def format_historical_data(data):
                 logger.error(f"Error processing historical {tb_param} data: {str(e)}")
     
     # Tạo dữ liệu giả cho các tham số còn thiếu
-    from app import generate_reading
+    import random
     
     now = datetime.now()
     
-    for param in PARAM_RANGES:
+    for param, param_info in param_ranges.items():
         if param not in formatted_data:
             param_data = []
             for i in range(60):  # 60 data points (1 per minute for the last hour)
                 time_point = now - timedelta(minutes=i)
-                value = generate_reading(PARAM_RANGES[param])
+                value = round(random.uniform(param_info["min"], param_info["max"]), 1)
                 param_data.append({
                     "timestamp": time_point.strftime("%H:%M"),
                     "value": value
@@ -277,11 +337,15 @@ def test_connection():
     Kiểm tra kết nối với ThingsBoard
     """
     try:
-        # Sử dụng token trực tiếp trong URL thay vì header
-        url = f"{THINGSBOARD_CONFIG['url']}/api/plugins/telemetry/DEVICE/{THINGSBOARD_CONFIG['device_id']}/values/timeseries?token={THINGSBOARD_CONFIG['access_token']}"
+        # Sử dụng JWT token trong header thay vì token trong URL
+        url = f"{THINGSBOARD_CONFIG['url']}/api/plugins/telemetry/DEVICE/{THINGSBOARD_CONFIG['device_id']}/values/timeseries"
+        headers = {
+            'X-Authorization': THINGSBOARD_CONFIG['jwt_token'],
+            'Content-Type': 'application/json'
+        }
         
-        logger.info(f"Testing connection to: {url}")
-        response = requests.get(url)
+        logger.info(f"Testing connection to ThingsBoard with JWT token")
+        response = requests.get(url, headers=headers)
         
         if response.status_code != 200:
             logger.error(f"ThingsBoard connection test failed: HTTP {response.status_code}, Response: {response.text}")

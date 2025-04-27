@@ -1,4 +1,9 @@
+import eventlet
+# Đặt monkey_patch trước tiên
+eventlet.monkey_patch()
+
 from flask import Flask, render_template, jsonify
+from flask_socketio import SocketIO
 import random
 import time
 from datetime import datetime, timedelta
@@ -10,6 +15,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger('app')
 
 app = Flask(__name__)
+# Cấu hình SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # Data ranges for each environmental parameter
 PARAM_RANGES = {
