@@ -9,4 +9,5 @@ dependencies = [
     "requests>=2.32.3",
     "eventlet>=0.39.1",
     "paho-mqtt>=2.1.0",
+    "colorama>=0.4.6",
 ]
