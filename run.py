@@ -2,7 +2,7 @@ import os
 import time
 import threading
 from app import app, socketio
-import thingsboard_client
+import thingsboard_mqtt_client as thingsboard_client
 
 # Hàm gửi dữ liệu cập nhật qua SocketIO
 def send_updates():
@@ -10,9 +10,12 @@ def send_updates():
     Gửi cập nhật dữ liệu theo thời gian thực qua SocketIO
     """
     print("Bắt đầu luồng cập nhật dữ liệu thời gian thực...")
+    # Khởi tạo client MQTT
+    thingsboard_client.initialize_mqtt_client()
+    
     while True:
         try:
-            # Lấy dữ liệu hiện tại
+            # Lấy dữ liệu hiện tại từ MQTT client
             data = thingsboard_client.get_current_readings()
             
             # Gửi dữ liệu qua SocketIO

@@ -304,10 +304,20 @@ header h1 {
     box-shadow: var(--box-shadow);
 }
 
+.data-source-container {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
 .data-source {
     text-align: center;
     font-size: 0.9rem;
     color: #666;
+    padding: 5px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    background: #f0f0f0;
 }
 
 .data-source p {
@@ -332,11 +342,11 @@ header h1 {
 }
 
 #data-source-status.disconnected {
-    color: var(--warning-color);
+    color: var(--danger-color);
 }
 
 #data-source-status.error {
-    color: var(--danger-color);
+    color: var(--warning-color);
 }
 
 /* Device Status Card Styles */

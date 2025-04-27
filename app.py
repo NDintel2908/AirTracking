@@ -150,14 +150,21 @@ def api_param_historical(param_name):
 def api_status():
     """API endpoint for ThingsBoard connection status"""
     try:
+        import thingsboard_mqtt_client
         import thingsboard_client
-        connection_status = thingsboard_client.test_connection()
+        
+        # Thử kết nối bằng cả hai cách
+        mqtt_status = thingsboard_mqtt_client.test_connection()
+        jwt_status = thingsboard_client.test_connection()
+        
+        # Nếu một trong hai kết nối thành công thì coi như kết nối được
+        connection_status = mqtt_status or jwt_status
         
         return jsonify({
             "thingsboard_connected": connection_status,
-            "device_id": thingsboard_client.THINGSBOARD_CONFIG['device_id'],
-            "dashboard_url": f"{thingsboard_client.THINGSBOARD_CONFIG['url']}/dashboards/{thingsboard_client.THINGSBOARD_CONFIG['dashboard_id']}",
-            "data_source": "ThingsBoard API" if connection_status and USE_THINGSBOARD else "Dữ liệu giả lập"
+            "device_id": thingsboard_mqtt_client.THINGSBOARD_CONFIG['device_id'],
+            "dashboard_url": f"https://{thingsboard_mqtt_client.THINGSBOARD_CONFIG['host']}/dashboards/0c0e97d0-bd24-11ef-af67-a38a7671daf5",
+            "data_source": "ThingsBoard API" if connection_status else "Dữ liệu giả lập"
         })
     except Exception as e:
         logger.error(f"Error checking ThingsBoard status: {str(e)}")
