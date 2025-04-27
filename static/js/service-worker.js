@@ -7,8 +7,8 @@ const urlsToCache = [
   '/static/css/style.css',
   '/static/js/main.js',
   '/static/js/charts.js',
-  '/static/icons/icon-192x192.png',
-  '/static/icons/icon-512x512.png',
+  '/static/icons/icon-192x192.svg',
+  '/static/icons/icon-512x512.svg',
   'https://cdn.jsdelivr.net/npm/chart.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'
 ];

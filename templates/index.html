@@ -93,9 +93,18 @@
         </div>
     </nav>
 
+    <!-- Thông tin nguồn dữ liệu -->
+    <div class="data-source-info">
+        <div class="data-source">
+            <p>Nguồn dữ liệu: <span id="data-source-status">Đang kiểm tra...</span></p>
+            <p>ThingsBoard Dashboard: <a href="https://demo.thingsboard.io/dashboards/0c0e97d0-bd24-11ef-af67-a38a7671daf5" target="_blank">Xem trên ThingsBoard</a></p>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/register-sw.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/services/thingsboard-api.js') }}"></script>
 </body>
 </html>

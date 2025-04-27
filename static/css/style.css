@@ -295,6 +295,50 @@ header h1 {
     color: var(--danger-color);
 }
 
+/* Data Source Info */
+.data-source-info {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: var(--card-bg-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.data-source {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.data-source p {
+    margin: 0.5rem 0;
+}
+
+.data-source a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.data-source a:hover {
+    text-decoration: underline;
+}
+
+#data-source-status {
+    font-weight: bold;
+}
+
+#data-source-status.connected {
+    color: var(--normal-color);
+}
+
+#data-source-status.disconnected {
+    color: var(--warning-color);
+}
+
+#data-source-status.error {
+    color: var(--danger-color);
+}
+
 /* Footer */
 footer {
     text-align: center;

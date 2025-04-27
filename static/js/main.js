@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateLastUpdated();
     fetchCurrentData();
     initializeMainChart();
+    checkThingsboardStatus();
 
     // Event listeners
     document.getElementById('refresh-btn').addEventListener('click', function() {
@@ -261,5 +262,32 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             options: getStandardChartOptions(paramName)
         });
+    }
+    
+    function checkThingsboardStatus() {
+        const dataSourceStatus = document.getElementById('data-source-status');
+        
+        if (dataSourceStatus) {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.thingsboard_connected) {
+                        dataSourceStatus.textContent = 'ThingsBoard API';
+                        dataSourceStatus.className = 'connected';
+                    } else {
+                        dataSourceStatus.textContent = 'Dữ liệu giả lập (Không thể kết nối ThingsBoard)';
+                        dataSourceStatus.className = 'disconnected';
+                        console.warn('ThingsBoard không khả dụng:', data.error || 'Lỗi xác thực');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi kiểm tra trạng thái API:', error);
+                    dataSourceStatus.textContent = 'Dữ liệu giả lập (Lỗi kết nối)';
+                    dataSourceStatus.className = 'error';
+                });
+        }
+        
+        // Kiểm tra lại sau 2 phút
+        setTimeout(checkThingsboardStatus, 2 * 60 * 1000);
     }
 });

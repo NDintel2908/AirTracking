@@ -1,4 +1,4 @@
-modules = ["python-3.11"]
+modules = ["nodejs-20", "python-3.11"]
 
 [nix]
 channel = "stable-24_05"
@@ -21,9 +21,6 @@ author = "agent"
 
 [workflows.workflow.metadata]
 agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

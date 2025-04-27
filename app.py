@@ -3,6 +3,11 @@ import random
 import time
 from datetime import datetime, timedelta
 import os
+import logging
+
+# Cấu hình logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('app')
 
 app = Flask(__name__)
 
@@ -17,8 +22,11 @@ PARAM_RANGES = {
     "co2": {"min": 300, "max": 2000, "unit": "ppm", "warning": 1000, "danger": 1500}
 }
 
-# Cache to store historical data
+# Cache to store historical data (sẽ được sử dụng nếu không thể kết nối với ThingsBoard)
 historical_data = {param: [] for param in PARAM_RANGES}
+
+# Kiểm tra xem có nên sử dụng ThingsBoard hay không
+USE_THINGSBOARD = True
 
 def generate_reading(param_info):
     """Generate a realistic reading for the given parameter"""
@@ -33,7 +41,17 @@ def get_status(value, param_info):
     return "normal"
 
 def get_current_readings():
-    """Generate current readings for all parameters"""
+    """Get current readings for all parameters, either from ThingsBoard or generated"""
+    if USE_THINGSBOARD:
+        try:
+            # Import khi cần thiết để tránh circular imports
+            import thingsboard_client
+            return thingsboard_client.get_current_readings()
+        except Exception as e:
+            logger.error(f"Error getting data from ThingsBoard: {str(e)}")
+            logger.info("Falling back to generated data")
+    
+    # Nếu không dùng ThingsBoard hoặc có lỗi, tạo dữ liệu giả
     timestamp = datetime.now().strftime("%H:%M:%S")
     readings = {}
     
@@ -59,7 +77,17 @@ def get_current_readings():
     return readings
 
 def get_historical_data(hours=1):
-    """Generate historical data for charts"""
+    """Get historical data for charts, either from ThingsBoard or generated"""
+    if USE_THINGSBOARD:
+        try:
+            # Import khi cần thiết để tránh circular imports
+            import thingsboard_client
+            return thingsboard_client.get_historical_data(hours)
+        except Exception as e:
+            logger.error(f"Error getting historical data from ThingsBoard: {str(e)}")
+            logger.info("Falling back to generated historical data")
+    
+    # Nếu không dùng ThingsBoard hoặc có lỗi, tạo dữ liệu giả
     now = datetime.now()
     data = {}
     
@@ -110,6 +138,27 @@ def api_param_historical(param_name):
     
     history = get_historical_data()
     return jsonify(history[param_name])
+
+@app.route('/api/status')
+def api_status():
+    """API endpoint for ThingsBoard connection status"""
+    try:
+        import thingsboard_client
+        connection_status = thingsboard_client.test_connection()
+        
+        return jsonify({
+            "thingsboard_connected": connection_status,
+            "device_id": thingsboard_client.THINGSBOARD_CONFIG['device_id'],
+            "dashboard_url": f"{thingsboard_client.THINGSBOARD_CONFIG['url']}/dashboards/{thingsboard_client.THINGSBOARD_CONFIG['dashboard_id']}",
+            "data_source": "ThingsBoard API" if connection_status and USE_THINGSBOARD else "Dữ liệu giả lập"
+        })
+    except Exception as e:
+        logger.error(f"Error checking ThingsBoard status: {str(e)}")
+        return jsonify({
+            "thingsboard_connected": False,
+            "error": str(e),
+            "data_source": "Dữ liệu giả lập"
+        })
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
