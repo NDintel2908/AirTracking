@@ -38,4 +38,4 @@ if __name__ == "__main__":
     update_thread.start()
     
     # Chạy ứng dụng với socketio thay vì app.run
-    socketio.run(app, host='0.0.0.0', port=port, debug=False)
+    socketio.run(app, host='0.0.0.0', port=port, debug=False, use_reloader=False, log_output=True)

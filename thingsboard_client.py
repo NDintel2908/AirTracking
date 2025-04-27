@@ -24,8 +24,8 @@ _data_cache = {
     'historical': {'data': None, 'timestamp': 0}
 }
 
-# Thời gian hết hạn cache (60 giây)
-CACHE_EXPIRY = 60
+# Thời gian hết hạn cache (4 giây)
+CACHE_EXPIRY = 4
 
 
 def _generate_fallback_readings():
@@ -219,13 +219,13 @@ def format_current_data(data):
     
     # Ánh xạ giữa tên tham số ThingsBoard và ứng dụng
     param_mapping = {
-        'temperature': 'temperature',
-        'humidity': 'humidity',
-        'pm10': 'pm10',
-        'pm25': 'pm25',
-        'co': 'co',
-        'co2': 'co2',
-        'noise': 'noise'
+        'Temperature': 'temperature',
+        'Humidity': 'humidity',
+        'PM10': 'pm10',
+        'PM2.5': 'pm25',
+        'CO': 'co',
+        'CO2': 'co2',
+        'Sound': 'noise'
     }
     
     # Chuyển đổi dữ liệu
@@ -282,13 +282,13 @@ def format_historical_data(data):
     
     # Ánh xạ giữa tên tham số ThingsBoard và ứng dụng
     param_mapping = {
-        'temperature': 'temperature',
-        'humidity': 'humidity',
-        'pm10': 'pm10',
-        'pm25': 'pm25',
-        'co': 'co',
-        'co2': 'co2',
-        'noise': 'noise'
+        'Temperature': 'temperature',
+        'Humidity': 'humidity',
+        'PM10': 'pm10',
+        'PM2.5': 'pm25',
+        'CO': 'co',
+        'CO2': 'co2',
+        'Sound': 'noise'
     }
     
     # Chuyển đổi dữ liệu lịch sử
