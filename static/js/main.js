@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'humidity': 'fa-water',
             'noise': 'fa-volume-up',
             'co': 'fa-wind',
-            'co2': 'fa-leaf'
+            'aqi': 'fa-leaf'
         };
 
         // Parameter to display name mapping
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'humidity': 'Độ ẩm',
             'noise': 'Tiếng ồn',
             'co': 'CO',
-            'co2': 'CO2'
+            'aqi': 'Chỉ số AQI'
         };
         
         // Status translation

@@ -4,6 +4,7 @@ import threading
 import logging
 from app import app, socketio
 import thingsboard_client as tb_jwt
+import vn_aqi_calculator as aqi_calc
 
 # Cấu hình logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -20,6 +21,35 @@ def send_updates():
         try:
             # Lấy dữ liệu hiện tại từ JWT client
             data = tb_jwt.get_current_readings()
+            
+            # Lấy dữ liệu AQI từ tính toán VN_AQI
+            aqi_value, aqi_status = aqi_calc.get_current_aqi()
+            
+            # Xóa CO2 nếu có
+            if 'co2' in data:
+                del data['co2']
+                
+            # Thêm AQI vào dữ liệu
+            timestamp = time.strftime("%H:%M:%S")
+            
+            # Debug để xem giá trị AQI
+            print(f"DEBUG: AQI Value: {aqi_value}, Status: {aqi_status}")
+            
+            if aqi_value is not None:
+                data['aqi'] = {
+                    "value": aqi_value,
+                    "unit": "",
+                    "status": aqi_status if aqi_status else "unknown",
+                    "timestamp": timestamp
+                }
+            else:
+                data['aqi'] = {
+                    "value": None,
+                    "unit": "",
+                    "status": "unknown",
+                    "timestamp": timestamp,
+                    "message": "Không có dữ liệu"
+                }
             
             # Gửi dữ liệu qua SocketIO
             socketio.emit('data_update', {'data': data, 'timestamp': time.time()})

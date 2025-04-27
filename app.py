@@ -26,7 +26,7 @@ PARAM_RANGES = {
     "humidity": {"min": 20, "max": 90, "unit": "%", "warning": 70, "danger": 85},
     "noise": {"min": 30, "max": 100, "unit": "dB", "warning": 70, "danger": 85},
     "co": {"min": 0, "max": 50, "unit": "ppm", "warning": 25, "danger": 40},
-    "co2": {"min": 300, "max": 2000, "unit": "ppm", "warning": 1000, "danger": 1500}
+    "aqi": {"min": 0, "max": 300, "unit": "", "warning": 100, "danger": 150}
 }
 
 # Cache to store historical data (sẽ được sử dụng nếu không thể kết nối với ThingsBoard)

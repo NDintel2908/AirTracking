@@ -93,7 +93,6 @@ function formatThingsboardData(data) {
         'pm10': 'pm10',
         'pm25': 'pm25',
         'co': 'co',
-        'co2': 'co2',
         'noise': 'noise'
     };
     
@@ -106,7 +105,7 @@ function formatThingsboardData(data) {
         "humidity": {"warning": 70, "danger": 85, "unit": "%"},
         "noise": {"warning": 70, "danger": 85, "unit": "dB"},
         "co": {"warning": 25, "danger": 40, "unit": "ppm"},
-        "co2": {"warning": 1000, "danger": 1500, "unit": "ppm"}
+        "aqi": {"warning": 100, "danger": 150, "unit": ""}
     };
     
     // Dữ liệu đã được định dạng
@@ -153,7 +152,6 @@ function formatHistoricalData(data) {
         'pm10': 'pm10',
         'pm25': 'pm25',
         'co': 'co',
-        'co2': 'co2',
         'noise': 'noise'
     };
     

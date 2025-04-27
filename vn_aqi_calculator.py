@@ -187,6 +187,30 @@ def display_aqi_info(aqi, iaqi_values, sensor_data):
     for level in AQI_LEVELS:
         print(f"  {level['color']}{level['range'][0]}-{level['range'][1]}: {level['label']} - {level['description']}")
 
+# Sử dụng file để lưu trữ giá trị AQI mới nhất
+def save_current_aqi(aqi_value, aqi_status):
+    """Lưu giá trị AQI và trạng thái vào file để chia sẻ giữa các processes"""
+    try:
+        with open('current_aqi.txt', 'w') as f:
+            f.write(f"{aqi_value}\n{aqi_status}")
+        print(f"Đã lưu AQI: {aqi_value}, trạng thái: {aqi_status}")
+    except Exception as e:
+        print(f"Lỗi khi lưu AQI: {e}")
+
+def get_current_aqi():
+    """Đọc chỉ số AQI hiện tại và trạng thái từ file"""
+    try:
+        with open('current_aqi.txt', 'r') as f:
+            lines = f.readlines()
+            if len(lines) >= 2:
+                aqi_value = float(lines[0].strip())
+                aqi_status = lines[1].strip()
+                return aqi_value, aqi_status
+            return None, None
+    except Exception as e:
+        print(f"Lỗi khi đọc AQI: {e}")
+        return None, None
+
 def main():
     """Hàm chính thực hiện tính toán và hiển thị AQI theo thời gian thực"""
     print(f"{Style.BRIGHT}{Fore.CYAN}Bắt đầu chương trình tính chỉ số chất lượng không khí VN_AQI...")
@@ -201,10 +225,27 @@ def main():
             # Tính chỉ số AQI
             aqi, iaqi_values = calculate_vn_aqi(sensor_data)
             
-            # Hiển thị thông tin AQI
+            # Xác định trạng thái AQI
             if aqi is not None:
+                aqi_level = get_aqi_level(aqi)
+                aqi_status = aqi_level["label"].lower()  # Chuyển thành chữ thường để phù hợp với các trạng thái khác
+                
+                # Chuyển đổi trạng thái cho phù hợp với định dạng ứng dụng (normal, warning, danger)
+                if aqi_status in ["tốt"]:
+                    aqi_status = "normal"
+                elif aqi_status in ["trung bình", "kém"]:
+                    aqi_status = "warning"
+                elif aqi_status in ["xấu", "rất xấu", "nguy hiểm"]:
+                    aqi_status = "danger"
+                
+                # Lưu giá trị AQI và trạng thái vào file để chia sẻ với EnvMonitor
+                save_current_aqi(aqi, aqi_status)
+                
+                # Hiển thị thông tin AQI
                 display_aqi_info(aqi, iaqi_values, sensor_data)
             else:
+                # Lưu giá trị AQI không xác định
+                save_current_aqi(None, "unknown")
                 print(f"\n{Fore.RED}Không thể tính AQI: Thiếu dữ liệu cảm biến!")
             
             # Chờ 5 giây trước khi cập nhật tiếp
