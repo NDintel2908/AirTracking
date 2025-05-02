@@ -51,12 +51,12 @@ CO_BREAKPOINTS = [
     {"c_low": 120.1, "c_high": 150, "i_low": 401, "i_high": 500} # Nguy hại
 ]
 
-# Màu sắc và mô tả cho các mức AQI
+# Màu sắc và mô tả cho các mức AQI (RGB values converted to nearest ANSI colors)
 AQI_LEVELS = [
-    {"range": (0, 50), "color": Fore.GREEN, "bg": Back.GREEN, "label": "TỐT", "description": "Chất lượng không khí tốt"},
-    {"range": (51, 100), "color": Fore.YELLOW, "bg": Back.YELLOW, "label": "TRUNG BÌNH", "description": "Chất lượng không khí trung bình"},
-    {"range": (101, 150), "color": Fore.LIGHTYELLOW_EX, "bg": Back.LIGHTYELLOW_EX, "label": "KÉM", "description": "Nhóm nhạy cảm nên hạn chế thời gian ở ngoài trời"},
-    {"range": (151, 200), "color": Fore.RED, "bg": Back.RED, "label": "XẤU", "description": "Nhóm nhạy cảm nên hạn chế ra ngoài"},
+    {"range": (0, 50), "color": Fore.GREEN, "bg": Back.GREEN, "label": "Tốt", "description": "Chất lượng không khí tốt"},
+    {"range": (51, 100), "color": Fore.YELLOW, "bg": Back.YELLOW, "label": "Trung bình", "description": "Chất lượng không khí trung bình"},
+    {"range": (101, 150), "color": Fore.LIGHTYELLOW_EX, "bg": Back.LIGHTYELLOW_EX, "label": "Kém", "description": "Nhóm nhạy cảm nên hạn chế thời gian ở ngoài trời"},
+    {"range": (151, 200), "color": Fore.RED, "bg": Back.RED, "label": "Xấu", "description": "Nhóm nhạy cảm nên hạn chế ra ngoài"},
     {"range": (201, 300), "color": Fore.MAGENTA, "bg": Back.MAGENTA, "label": "RẤT XẤU", "description": "Nhóm nhạy cảm tránh ra ngoài trời"},
     {"range": (301, 500), "color": Fore.WHITE + Back.RED, "bg": Back.RED, "label": "NGUY HIỂM", "description": "Mọi người nên ở trong nhà"}
 ]
