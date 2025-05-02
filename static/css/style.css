@@ -153,6 +153,7 @@ header h1 {
 
 .warning {
     background-color: var(--medium-color);  /* "Trung bình" màu vàng */
+    color: black; /* Thay đổi màu chữ sang đen để tăng tính tương phản trên nền vàng */
 }
 
 .kem {
