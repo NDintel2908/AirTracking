@@ -232,9 +232,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Status translation
         const statusTranslations = {
-            'normal': 'BÌNH THƯỜNG',
-            'warning': 'CẢNH BÁO',
-            'danger': 'NGUY HIỂM',
+            'normal': 'TỐT',
+            'warning': 'TRUNG BÌNH',
+            'kém': 'KÉM',
+            'danger': 'XẤU',
             'offline': 'NGOẠI TUYẾN',
             'unknown': 'KHÔNG CÓ DỮ LIỆU'
         };
@@ -253,8 +254,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Thêm chỉ báo trạng thái
             let statusIndicator = '';
-            if (reading.status === 'warning' || reading.status === 'danger') {
-                statusIndicator = `<span class="status-badge ${reading.status}"></span>`;
+            let statusClass = reading.status;
+            
+            // Xử lý trạng thái tiếng Việt có dấu
+            if (reading.status === 'kém') {
+                statusClass = 'kem'; // CSS không hỗ trợ tốt tên class có dấu, đổi thành không dấu
+            }
+            
+            if (reading.status === 'warning' || reading.status === 'kém' || reading.status === 'danger') {
+                statusIndicator = `<span class="status-badge ${statusClass}"></span>`;
             }
             
             // Kiểm tra nếu có thông báo thay vì giá trị
@@ -274,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${statusIndicator}
                 </div>
                 ${valueDisplay}
-                <div class="card-status ${reading.status}">
+                <div class="card-status ${statusClass}">
                     ${statusText}
                 </div>
                 <div class="card-timestamp">

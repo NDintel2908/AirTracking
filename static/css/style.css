@@ -2,9 +2,10 @@
 :root {
     --primary-color: #3498db;
     --secondary-color: #2ecc71;
-    --danger-color: #e74c3c;
-    --warning-color: #f39c12;
-    --normal-color: #2ecc71;
+    --danger-color: #ff0000;      /* Xấu - RGB 255,0,0 */
+    --warning-color: #ff7e00;     /* Kém - RGB 255,126,0 */
+    --normal-color: #00e400;      /* Tốt - RGB 0,228,0 */
+    --medium-color: #ffff00;      /* Trung bình - RGB 255,255,0 */
     --background-color: #f5f7fa;
     --card-bg-color: #ffffff;
     --text-color: #333333;
@@ -151,11 +152,15 @@ header h1 {
 }
 
 .warning {
-    background-color: var(--warning-color);
+    background-color: var(--medium-color);  /* "Trung bình" màu vàng */
+}
+
+.kem {
+    background-color: var(--warning-color);  /* "Kém" màu cam */
 }
 
 .danger {
-    background-color: var(--danger-color);
+    background-color: var(--danger-color);  /* "Xấu" màu đỏ */
 }
 
 /* Chart container */

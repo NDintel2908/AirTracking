@@ -230,11 +230,13 @@ def main():
                 aqi_level = get_aqi_level(aqi)
                 aqi_status = aqi_level["label"].lower()  # Chuyển thành chữ thường để phù hợp với các trạng thái khác
                 
-                # Chuyển đổi trạng thái cho phù hợp với định dạng ứng dụng (normal, warning, danger)
+                # Chuyển đổi trạng thái cho phù hợp với định dạng ứng dụng
                 if aqi_status in ["tốt"]:
                     aqi_status = "normal"
-                elif aqi_status in ["trung bình", "kém"]:
+                elif aqi_status in ["trung bình"]:
                     aqi_status = "warning"
+                elif aqi_status in ["kém"]:
+                    aqi_status = "kém"
                 elif aqi_status in ["xấu", "rất xấu", "nguy hiểm"]:
                     aqi_status = "danger"
                 
