@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Môi Trường Xung Quanh</string>
+    
+    <!-- Main Screen -->
+    <string name="offline_indicator">Bạn đang ở chế độ ngoại tuyến</string>
+    <string name="pull_refresh">Kéo xuống để làm mới</string>
+    <string name="header_title">Môi Trường Xung Quanh</string>
+    <string name="data_source">Nguồn dữ liệu:</string>
+    <string name="refresh_button">Làm mới</string>
+    <string name="last_updated">Cập nhật lúc:</string>
+    <string name="chart_overview">Biểu đồ tổng quan</string>
+    <string name="chart_param">Thông số:</string>
+    <string name="loading">Đang tải dữ liệu…</string>
+    <string name="loading_error">Lỗi tải dữ liệu. Vui lòng thử lại.</string>
+    <string name="offline_message">Bạn đang ở chế độ ngoại tuyến. Vui lòng kiểm tra kết nối mạng.</string>
+    <string name="footer_copyright">Giám sát môi trường © 2025</string>
+    
+    <!-- Nav Bar -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_chart">Biểu đồ</string>
+    <string name="nav_notifications">Thông báo</string>
+    <string name="nav_settings">Cài đặt</string>
+    <string name="feature_development">Tính năng đang phát triển</string>
+    
+    <!-- Device Status -->
+    <string name="status_online">Thiết bị đang hoạt động bình thường</string>
+    <string name="status_inactive">Thiết bị không hoạt động (không có dữ liệu mới)</string>
+    <string name="status_offline">Thiết bị ngắt kết nối</string>
+    <string name="status_unknown">Không xác định được trạng thái thiết bị</string>
+    <string name="last_update_time_format">Dữ liệu cuối cập nhật: %1$s</string>
+    <string name="last_update_minutes">%1$d phút trước</string>
+    <string name="last_update_hours">%1$d giờ %2$d phút trước</string>
+    
+    <!-- Parameter names -->
+    <string name="param_pm10">PM10</string>
+    <string name="param_pm25">PM2.5</string>
+    <string name="param_temperature">Nhiệt độ</string>
+    <string name="param_humidity">Độ ẩm</string>
+    <string name="param_noise">Tiếng ồn</string>
+    <string name="param_co">CO</string>
+    <string name="param_aqi">Chỉ số AQI</string>
+    
+    <!-- Parameter status -->
+    <string name="status_normal">TỐT</string>
+    <string name="status_warning">TRUNG BÌNH</string>
+    <string name="status_kem">KÉM</string>
+    <string name="status_danger">XẤU</string>
+    <string name="status_offline_param">NGOẠI TUYẾN</string>
+    <string name="status_unknown_param">KHÔNG CÓ DỮ LIỆU</string>
+    
+    <!-- ThingsBoard -->
+    <string name="thingsboard_connected">ThingsBoard API (Kết nối thành công)</string>
+    <string name="thingsboard_disconnected">Dữ liệu giả lập (Không thể kết nối ThingsBoard)</string>
+    <string name="thingsboard_error">Dữ liệu giả lập (Lỗi kết nối)</string>
+    <string name="thingsboard_checking">Đang kiểm tra…</string>
+    <string name="thingsboard_dashboard">ThingsBoard Dashboard: </string>
+    <string name="thingsboard_view">Xem trên ThingsBoard</string>
+    
+    <!-- Parameter Detail Screen -->
+    <string name="parameter_detail">Chi tiết thông số</string>
+    <string name="threshold_warning">Ngưỡng cảnh báo:</string>
+    <string name="threshold_danger">Ngưỡng nguy hiểm:</string>
+    <string name="current_value">Giá trị hiện tại:</string>
+    <string name="unit">Đơn vị:</string>
+    <string name="status">Trạng thái:</string>
+    <string name="parameter_description">Mô tả:</string>
+    <string name="historical_chart">Biểu đồ lịch sử</string>
+</resources>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.EnvMonitor" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <!-- Background colors -->
+        <item name="android:colorBackground">@color/background</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+    </style>
+
+    <style name="Theme.EnvMonitor.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+
+    <style name="Theme.EnvMonitor.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+
+    <!-- Parameter Status Badge Styles -->
+    <style name="StatusBadge">
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="StatusBadge.Normal">
+        <item name="android:background">@color/status_normal</item>
+        <item name="android:textColor">@color/text_on_normal</item>
+    </style>
+
+    <style name="StatusBadge.Warning">
+        <item name="android:background">@color/status_warning</item>
+        <item name="android:textColor">@color/text_on_warning</item>
+    </style>
+
+    <style name="StatusBadge.Kem">
+        <item name="android:background">@color/status_kem</item>
+        <item name="android:textColor">@color/text_on_kem</item>
+    </style>
+
+    <style name="StatusBadge.Danger">
+        <item name="android:background">@color/status_danger</item>
+        <item name="android:textColor">@color/text_on_danger</item>
+    </style>
+
+    <style name="StatusBadge.Offline">
+        <item name="android:background">@color/status_offline</item>
+        <item name="android:textColor">@color/text_on_offline</item>
+    </style>
+</resources>

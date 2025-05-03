@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#3498db</color>
+    <color name="primary_dark">#2980b9</color>
+    <color name="accent">#2ecc71</color>
+    <color name="background">#f5f5f5</color>
+    <color name="text_primary">#333333</color>
+    <color name="text_secondary">#757575</color>
+    <color name="divider">#e0e0e0</color>
+    
+    <!-- Status colors -->
+    <color name="status_normal">#2ecc71</color>  <!-- Green - Tốt -->
+    <color name="status_warning">#f39c12</color>  <!-- Yellow - Trung bình -->
+    <color name="status_kem">#ff7e00</color>  <!-- Orange - Kém -->
+    <color name="status_danger">#e74c3c</color>  <!-- Red - Xấu -->
+    <color name="status_offline">#95a5a6</color>  <!-- Gray - Offline -->
+    <color name="status_unknown">#7f8c8d</color>  <!-- Dark Gray - Unknown -->
+    
+    <!-- Text colors for status badges -->
+    <color name="text_on_normal">#ffffff</color>
+    <color name="text_on_warning">#000000</color>  <!-- Black text on yellow background -->
+    <color name="text_on_kem">#ffffff</color>
+    <color name="text_on_danger">#ffffff</color>
+    <color name="text_on_offline">#ffffff</color>
+    <color name="text_on_unknown">#ffffff</color>
+    
+    <!-- Connection status colors -->
+    <color name="connected">#2ecc71</color>
+    <color name="disconnected">#e74c3c</color>
+    <color name="checking">#3498db</color>
+    
+    <!-- Device status colors -->
+    <color name="device_online">#2ecc71</color>
+    <color name="device_inactive">#f39c12</color>
+    <color name="device_offline">#e74c3c</color>
+    <color name="device_unknown">#95a5a6</color>
+    
+    <!-- Chart colors -->
+    <color name="chart_line">#3498db</color>
+    <color name="chart_grid">#e0e0e0</color>
+    <color name="chart_background_start">#4D3498db</color>  <!-- 30% opacity -->
+    <color name="chart_background_end">#103498db</color>    <!-- 5% opacity -->
+    
+    <!-- Card colors -->
+    <color name="card_background">#ffffff</color>
+    <color name="card_shadow">#20000000</color>  <!-- 12% opacity black -->
+    
+    <!-- Bottom navigation colors -->
+    <color name="nav_background">#ffffff</color>
+    <color name="nav_active">#3498db</color>
+    <color name="nav_inactive">#95a5a6</color>
+    
+    <!-- Color for AQI per Vietnamese standards -->
+    <color name="aqi_good">#00e400</color>          <!-- 0-50: Tốt -->
+    <color name="aqi_moderate">#ffff00</color>      <!-- 51-100: Trung bình -->
+    <color name="aqi_poor">#ff7e00</color>          <!-- 101-150: Kém -->
+    <color name="aqi_bad">#ff0000</color>           <!-- 151-200: Xấu -->
+    <color name="aqi_very_bad">#99004c</color>      <!-- 201-300: Rất xấu -->
+    <color name="aqi_hazardous">#7e0023</color>     <!-- 301-500: Nguy hiểm -->
+    
+    <!-- Skeleton loading colors -->
+    <color name="skeleton_color">#E0E0E0</color>    <!-- Light gray for skeleton loading -->
+</resources>
