@@ -15,7 +15,7 @@ function getColorForValue(param, value) {
         'temperature': { warning: 35, danger: 40 },
         'humidity': { warning: 70, danger: 85 },
         'noise': { warning: 70, danger: 85 },
-        'co': { warning: 25, danger: 40 },
+        'co': { warning: 30, danger: 60 },
         'co2': { warning: 1000, danger: 1500 }
     };
 

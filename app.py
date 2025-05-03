@@ -25,7 +25,7 @@ PARAM_RANGES = {
     "temperature": {"min": 15, "max": 40, "unit": "°C", "warning": 35, "danger": 40},
     "humidity": {"min": 20, "max": 90, "unit": "%", "warning": 70, "danger": 85},
     "noise": {"min": 30, "max": 100, "unit": "dB", "warning": 70, "danger": 85},
-    "co": {"min": 0, "max": 50, "unit": "ppm", "warning": 25, "danger": 40},
+    "co": {"min": 0, "max": 60, "unit": "ppm", "warning": 30, "danger": 60},
     "aqi": {"min": 0, "max": 300, "unit": "", "warning": 100, "danger": 150}
 }
 
