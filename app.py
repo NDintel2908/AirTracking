@@ -22,7 +22,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 PARAM_RANGES = {
     "pm10": {"min": 0, "max": 150, "unit": "μg/m³", "warning": 50, "danger": 100},
     "pm25": {"min": 0, "max": 75, "unit": "μg/m³", "warning": 25, "danger": 50},
-    "temperature": {"min": 15, "max": 35, "unit": "°C", "warning": 30, "danger": 33},
+    "temperature": {"min": 15, "max": 40, "unit": "°C", "warning": 35, "danger": 40},
     "humidity": {"min": 20, "max": 90, "unit": "%", "warning": 70, "danger": 85},
     "noise": {"min": 30, "max": 100, "unit": "dB", "warning": 70, "danger": 85},
     "co": {"min": 0, "max": 50, "unit": "ppm", "warning": 25, "danger": 40},
