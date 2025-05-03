@@ -12,7 +12,7 @@ function getColorForValue(param, value) {
     const defaultThresholds = {
         'pm10': { warning: 50, danger: 100 },
         'pm25': { warning: 25, danger: 50 },
-        'temperature': { warning: 30, danger: 33 },
+        'temperature': { warning: 35, danger: 40 },
         'humidity': { warning: 70, danger: 85 },
         'noise': { warning: 70, danger: 85 },
         'co': { warning: 25, danger: 40 },
