@@ -1,36 +1,66 @@
-class HistoricalDataPoint {
-  final String timestamp;
-  final double value;
-
-  HistoricalDataPoint({
-    required this.timestamp,
-    required this.value,
+class HistoricalData {
+  final Map<String, List<HistoricalDataPoint>> data;
+  
+  HistoricalData({
+    required this.data,
   });
-
-  factory HistoricalDataPoint.fromJson(Map<String, dynamic> json) {
-    return HistoricalDataPoint(
-      timestamp: json['timestamp'] as String,
-      value: json['value'] is int
-          ? (json['value'] as int).toDouble()
-          : json['value'] as double,
-    );
+  
+  // Lấy dữ liệu lịch sử cho một thông số cụ thể
+  List<HistoricalDataPoint> getParameterData(String paramName) {
+    return data[paramName] ?? [];
+  }
+  
+  // Lấy danh sách thời gian (timestamp) chung
+  List<String> getTimeLabels() {
+    if (data.isEmpty) return [];
+    
+    // Lấy timestamp từ thông số đầu tiên (nếu có)
+    final firstParam = data.keys.first;
+    final points = data[firstParam] ?? [];
+    
+    return points.map((point) => point.timestamp).toList();
   }
 }
 
-/// Map từ parameter ID sang danh sách các điểm dữ liệu lịch sử
-typedef HistoricalData = Map<String, List<HistoricalDataPoint>>;
+class HistoricalDataPoint {
+  final double value;
+  final String timestamp;
+  final String status;
+  
+  HistoricalDataPoint({
+    required this.value,
+    required this.timestamp,
+    required this.status,
+  });
+  
+  factory HistoricalDataPoint.fromJson(Map<String, dynamic> json) {
+    return HistoricalDataPoint(
+      value: (json['value'] as num).toDouble(),
+      timestamp: json['timestamp'] as String,
+      status: json['status'] as String? ?? 'normal',
+    );
+  }
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'timestamp': timestamp,
+      'status': status,
+    };
+  }
+}
 
-/// Hàm chuyển đổi từ JSON sang HistoricalData
+// Hàm phân tích dữ liệu lịch sử từ API
 HistoricalData parseHistoricalData(Map<String, dynamic> json) {
-  final result = <String, List<HistoricalDataPoint>>{};
+  final Map<String, List<HistoricalDataPoint>> data = {};
   
   json.forEach((key, value) {
     if (value is List) {
-      result[key] = value
+      data[key] = value
           .map((item) => HistoricalDataPoint.fromJson(item as Map<String, dynamic>))
           .toList();
     }
   });
   
-  return result;
+  return HistoricalData(data: data);
 }
