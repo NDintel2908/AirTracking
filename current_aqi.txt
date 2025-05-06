@@ -1,2 +1,2 @@
-75
-warning
+160
+danger
